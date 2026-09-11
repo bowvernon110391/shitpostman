@@ -23,7 +23,7 @@ export function AboutModal(): JSX.Element {
         <span style={{ fontSize: 40, lineHeight: 1 }}>🫧</span>
         <span style={{ fontSize: 17, fontWeight: 700 }}>Shitpostman</span>
         <span className="aero-dim" style={{ fontSize: 12 }}>
-          Aero edition · v1.0.0
+          Aero edition · v{__APP_VERSION__}
         </span>
         <span className="aero-hint" style={{ maxWidth: 340 }}>
           A desktop API client with a Frutiger Aero soul — glossy glass, tropical bubbles and frutiger

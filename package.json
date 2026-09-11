@@ -1,6 +1,6 @@
 {
   "name": "shitpostman",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Frutiger Aero flavoured API client for the desktop.",
   "main": "./out/main/index.js",
   "author": "Bowie",
