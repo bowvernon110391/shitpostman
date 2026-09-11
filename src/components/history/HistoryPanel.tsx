@@ -27,7 +27,7 @@ export function HistoryPanel(): JSX.Element {
 
   return (
     <>
-      <div className="app-list aero-scroll">
+      <div className="app-list app-list--scroll aero-scroll">
         {history.map((entry: HistoryEntry) => {
           const tone = statusTone(entry.status)
           return (

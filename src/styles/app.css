@@ -291,6 +291,20 @@
   padding: 8px;
 }
 
+/*
+ * List that owns its own scrolling. Only use this when the list IS the scroll
+ * region — when it already sits inside one (e.g. `.app-pane__body`) use the
+ * plain `.app-list`, otherwise the two scrollers fight.
+ *
+ * `.aero-scroll` alone does NOT do this: it only themes the scrollbar.
+ */
+.app-list--scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .app-list__row {
   display: flex;
   align-items: center;
