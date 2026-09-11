@@ -46,5 +46,3 @@ export function resetState(): PersistedState {
 export function getStorePath(): string {
   return store.path
 }
-
-export { store }

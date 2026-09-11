@@ -1,4 +1,4 @@
-import type { Collection, CollectionItem, Folder, SavedRequest } from '@shared/types'
+import type { Collection, CollectionItem, SavedRequest } from '@shared/types'
 
 /** Depth-first search for a node anywhere in a forest. */
 export function findItem(items: CollectionItem[], id: string): CollectionItem | null {
@@ -82,34 +82,6 @@ export function insertItem(
   })
 }
 
-/** Move a node to a new parent (used by drag & drop). */
-export function moveItem(
-  items: CollectionItem[],
-  id: string,
-  newParentId: string | null
-): CollectionItem[] {
-  const node = findItem(items, id)
-  if (!node) return items
-
-  // Refuse to drop a folder into itself or one of its descendants.
-  if (node.type === 'folder' && newParentId) {
-    const descendantIds = new Set<string>()
-    const collect = (folder: Folder): void => {
-      for (const child of folder.items) {
-        descendantIds.add(child.id)
-        if (child.type === 'folder') collect(child)
-      }
-    }
-    collect(node)
-    if (descendantIds.has(newParentId) || newParentId === id) return items
-  }
-
-  // Detach, then re-attach. `detach: false` keeps a reference for re-insertion.
-  const detached = node
-  const without = removeItem(items, id)
-  return insertItem(without, newParentId, detached)
-}
-
 /** Flatten every saved request in a forest. */
 export function collectRequests(items: CollectionItem[]): SavedRequest[] {
   const out: SavedRequest[] = []
@@ -123,9 +95,4 @@ export function collectRequests(items: CollectionItem[]): SavedRequest[] {
 /** Count nested requests, for the collection subtitle. */
 export function countRequests(items: CollectionItem[]): number {
   return collectRequests(items).length
-}
-
-/** Find the first request in a forest (used to auto-open on launch). */
-export function firstRequest(items: CollectionItem[]): SavedRequest | null {
-  return collectRequests(items)[0] ?? null
 }

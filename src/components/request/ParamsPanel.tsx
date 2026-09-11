@@ -1,3 +1,4 @@
+import { isEnabled } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { KeyValueEditor } from '../ui/KeyValueEditor'
 import { CopyButton } from '../ui/CopyButton'
@@ -7,7 +8,7 @@ export function ParamsPanel(): JSX.Element {
   const draft = useAppStore((state) => state.draft)
   const patchDraft = useAppStore((state) => state.patchDraft)
 
-  const active = draft.params.filter((row) => row.enabled && row.key.trim())
+  const active = draft.params.filter(isEnabled)
   const preview = active.length
     ? `${draft.url.split('?')[0]}?${active
         .map((row) => `${encodeURIComponent(row.key)}=${encodeURIComponent(row.value)}`)

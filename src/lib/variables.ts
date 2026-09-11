@@ -1,4 +1,4 @@
-import type { KeyValue, RequestConfig } from '@shared/types'
+import { isEnabled, type KeyValue, type RequestConfig } from '@shared/types'
 
 export type VariableMap = Record<string, string>
 
@@ -84,7 +84,7 @@ export function resolveRequest(config: RequestConfig, vars: VariableMap): Reques
 }
 
 /** Every variable name referenced anywhere in a request. */
-export function collectVariableNames(config: RequestConfig): string[] {
+function collectVariableNames(config: RequestConfig): string[] {
   const names = new Set<string>()
 
   const scan = (text: string | undefined): void => {
@@ -129,7 +129,7 @@ export function findUnresolved(config: RequestConfig, vars: VariableMap): string
 export function rowsToMap(rows: KeyValue[]): VariableMap {
   const out: VariableMap = {}
   for (const row of rows) {
-    if (!row.enabled || !row.key.trim()) continue
+    if (!isEnabled(row)) continue
     out[row.key.trim()] = row.value
   }
   return out

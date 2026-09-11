@@ -1,3 +1,4 @@
+import { isEnabled } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { KeyValueEditor } from '../ui/KeyValueEditor'
 
@@ -6,7 +7,7 @@ export function HeadersPanel(): JSX.Element {
   const draft = useAppStore((state) => state.draft)
   const patchDraft = useAppStore((state) => state.patchDraft)
 
-  const count = draft.headers.filter((row) => row.enabled && row.key.trim()).length
+  const count = draft.headers.filter(isEnabled).length
 
   return (
     <div

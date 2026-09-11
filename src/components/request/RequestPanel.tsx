@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Code2, FileText, KeyRound, ListFilter, Lock } from 'lucide-react'
+import { isEnabled } from '@shared/types'
 import { useAppStore, type RequestTab } from '../../store/useAppStore'
 import { UrlBar } from './UrlBar'
 import { ParamsPanel } from './ParamsPanel'
@@ -41,8 +42,8 @@ export function RequestPanel(): JSX.Element {
   }, [send])
 
   const counts: Record<RequestTab, number | null> = {
-    params: draft.params.filter((row) => row.enabled && row.key.trim()).length,
-    headers: draft.headers.filter((row) => row.enabled && row.key.trim()).length,
+    params: draft.params.filter(isEnabled).length,
+    headers: draft.headers.filter(isEnabled).length,
     body: draft.body.type === 'none' ? 0 : 1,
     auth: draft.auth.type === 'none' ? 0 : 1,
     code: null

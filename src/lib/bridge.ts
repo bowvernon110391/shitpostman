@@ -18,7 +18,7 @@ const EMPTY_STATE: PersistedState = {
 }
 
 /** True when running inside the real Electron shell with a live preload bridge. */
-export function hasNativeBridge(): boolean {
+function hasNativeBridge(): boolean {
   return typeof window !== 'undefined' && typeof window.aero === 'object' && window.aero !== null
 }
 

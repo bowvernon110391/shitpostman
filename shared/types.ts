@@ -24,6 +24,27 @@ export interface KeyValue {
   description?: string
 }
 
+/**
+ * A row "counts" when it has a non-empty key, regardless of its enabled flag.
+ *
+ * Deliberately distinct from {@link isEnabled}: environment variables have no
+ * enabled flag at all, and Postman export must retain disabled rows so it can
+ * write `disabled: true`.
+ */
+export function isFilled(row: KeyValue): boolean {
+  return row.key.trim().length > 0
+}
+
+/**
+ * A row counts as "active" when it is enabled and has a non-empty key.
+ *
+ * Shared by both processes so that request assembly, previews and code
+ * generation all agree on exactly which rows are actually sent.
+ */
+export function isEnabled(row: KeyValue): boolean {
+  return row.enabled && isFilled(row)
+}
+
 /* ------------------------------------------------------------------ */
 /* Auth                                                                */
 /* ------------------------------------------------------------------ */

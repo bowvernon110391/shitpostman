@@ -7,17 +7,23 @@ import type {
   HttpResponseData,
   RequestConfig
 } from '../shared/types'
-import { buildAuth } from './auth'
-import { findKeyInsensitive, isEnabled } from './utils'
+import { isEnabled } from '../shared/types'
+import { buildAuth } from '../shared/auth'
 
 /** Content types we can safely hand to the renderer as UTF-8 text. */
 const TEXTUAL_RE =
   /^(?:text\/|application\/(?:json|[\w.+-]*\+json|xml|[\w.+-]*\+xml|javascript|ecmascript|x-www-form-urlencoded|graphql|x-ndjson|ndjson|sql|yaml|x-yaml))/
 
-export function isTextualContentType(contentType: string): boolean {
+function isTextualContentType(contentType: string): boolean {
   const ct = (contentType || '').split(';')[0].trim().toLowerCase()
   if (!ct) return true
   return TEXTUAL_RE.test(ct)
+}
+
+/** Case-insensitive lookup helper for header maps. */
+function findKeyInsensitive(map: Record<string, string>, key: string): string | undefined {
+  const target = key.toLowerCase()
+  return Object.keys(map).find((k) => k.toLowerCase() === target)
 }
 
 /** Default Content-Type for each body mode. */
@@ -90,7 +96,7 @@ function buildBody(body: BodyConfig): { data?: unknown; contentType?: string } {
 }
 
 /** Assemble the axios config from a resolved request + settings. */
-export function buildAxiosConfig(
+function buildAxiosConfig(
   config: RequestConfig,
   settings: AppSettings
 ): AxiosRequestConfig {
@@ -242,11 +248,4 @@ export async function sendRequest(
   } catch (error) {
     return toHttpError(error)
   }
-}
-
-/** Type guard used by the IPC layer to tell responses from errors. */
-export function isHttpError(
-  value: HttpResponseData | HttpErrorData
-): value is HttpErrorData {
-  return typeof (value as HttpErrorData).error === 'string'
 }

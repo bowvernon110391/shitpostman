@@ -1,5 +1,5 @@
-import type { KeyValue, RequestConfig } from '@shared/types'
-import { buildAuth, kvListToRecord } from './authShared'
+import { isEnabled, type RequestConfig } from '@shared/types'
+import { buildAuth } from '@shared/auth'
 
 /** The languages we can generate client code for. */
 export type CodeLanguage = 'curl' | 'javascript' | 'python' | 'node'
@@ -19,12 +19,12 @@ interface FlatRequest {
 }
 
 /** Collapse a request config into URL + headers + body for codegen. */
-export function flattenRequest(config: RequestConfig): FlatRequest {
+function flattenRequest(config: RequestConfig): FlatRequest {
   const auth = buildAuth(config.auth)
   const headers: Record<string, string> = { ...auth.headers }
 
   for (const row of config.headers) {
-    if (!row.enabled || !row.key.trim()) continue
+    if (!isEnabled(row)) continue
     headers[row.key] = row.value
   }
 
@@ -36,7 +36,7 @@ export function flattenRequest(config: RequestConfig): FlatRequest {
     url.searchParams.append(key, value)
   }
   for (const row of config.params) {
-    if (!row.enabled || !row.key.trim()) continue
+    if (!isEnabled(row)) continue
     url.searchParams.append(row.key, row.value)
   }
 
@@ -56,7 +56,7 @@ export function flattenRequest(config: RequestConfig): FlatRequest {
     case 'form': {
       const params = new URLSearchParams()
       for (const row of config.body.formData ?? []) {
-        if (!row.enabled || !row.key.trim()) continue
+        if (!isEnabled(row)) continue
         params.append(row.key, row.value)
       }
       body = params.toString()
@@ -235,10 +235,3 @@ export function generateCode(config: RequestConfig, language: CodeLanguage): str
       return ''
   }
 }
-
-/** Export helper re-used by the request builder's "copy as" menu. */
-export function enabledRows(rows: KeyValue[]): KeyValue[] {
-  return rows.filter((row) => row.enabled && row.key.trim())
-}
-
-export { kvListToRecord }

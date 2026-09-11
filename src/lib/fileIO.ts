@@ -20,5 +20,4 @@ export async function importFromFile(options?: OpenFileOptions): Promise<string 
 }
 
 export const JSON_FILTER = { name: 'JSON', extensions: ['json'] }
-export const TEXT_FILTER = { name: 'Text', extensions: ['txt', 'log', 'json', 'xml', 'html'] }
 export const ALL_FILTER = { name: 'All files', extensions: ['*'] }

@@ -105,8 +105,3 @@ export function tryPrettyJson(text: string): { pretty: string; parsed: unknown }
 export function base64ToDataUrl(base64: string, contentType: string): string {
   return `data:${contentType || 'application/octet-stream'};base64,${base64}`
 }
-
-/** Rough size of a string in bytes (UTF-8). */
-export function byteLength(text: string): number {
-  return new TextEncoder().encode(text).length
-}

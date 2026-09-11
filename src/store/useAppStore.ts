@@ -27,11 +27,6 @@ export interface Toast {
   tone: 'success' | 'info' | 'warning' | 'danger'
 }
 
-export interface TreeNode {
-  item: CollectionItem
-  depth: number
-}
-
 interface AppState {
   /* ---------------- persisted domain ---------------- */
   collections: Collection[]

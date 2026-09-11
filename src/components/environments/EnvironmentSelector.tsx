@@ -1,4 +1,5 @@
 import { Globe, Sliders } from 'lucide-react'
+import { isFilled } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
 
@@ -10,7 +11,7 @@ export function EnvironmentSelector(): JSX.Element {
   const openModal = useUiStore((state) => state.openModal)
 
   const active = environments.find((entry) => entry.id === activeEnvironmentId) ?? null
-  const variables = active ? active.variables.filter((row) => row.key.trim()).length : 0
+  const variables = active ? active.variables.filter(isFilled).length : 0
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

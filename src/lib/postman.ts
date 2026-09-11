@@ -1,7 +1,6 @@
 import type {
   AuthConfig,
   BodyConfig,
-  BodyType,
   Collection,
   CollectionItem,
   Environment,
@@ -9,7 +8,7 @@ import type {
   KeyValue,
   RawLanguage
 } from '@shared/types'
-import { HTTP_METHODS } from '@shared/types'
+import { HTTP_METHODS, isEnabled, isFilled } from '@shared/types'
 import { createId } from './ids'
 
 const POSTMAN_SCHEMA =
@@ -24,7 +23,7 @@ function kv(key: string, value: string, enabled = true): KeyValue {
 }
 
 function enabledRows(rows: KeyValue[] | undefined): KeyValue[] {
-  return (rows ?? []).filter((row) => row.enabled && row.key.trim())
+  return (rows ?? []).filter(isEnabled)
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -292,7 +291,7 @@ export function importPostmanCollection(json: string): ImportResult {
 
 function exportRows(rows: KeyValue[] | undefined): unknown[] {
   return (rows ?? [])
-    .filter((row) => row.key.trim())
+    .filter(isFilled)
     .map((row) => ({ key: row.key, value: row.value, disabled: !row.enabled }))
 }
 
@@ -377,23 +376,6 @@ function exportItem(item: CollectionItem): unknown {
   }
 }
 
-/** Serialise a single collection as a Postman v2.1 document. */
-export function exportPostmanCollection(collection: Collection): string {
-  return JSON.stringify(
-    {
-      info: {
-        _postman_id: collection.id,
-        name: collection.name,
-        description: collection.description ?? '',
-        schema: POSTMAN_SCHEMA
-      },
-      item: collection.items.map(exportItem)
-    },
-    null,
-    2
-  )
-}
-
 /** Serialise every collection into one Postman-compatible document. */
 export function exportAllCollections(collections: Collection[]): string {
   return JSON.stringify(
@@ -410,7 +392,10 @@ export function exportAllCollections(collections: Collection[]): string {
   )
 }
 
-/** Serialise an environment as a Postman environment document. */
+/**
+ * Serialise an environment as a Postman environment document.
+ * Disabled variables are dropped — Postman environments carry no per-row flag.
+ */
 export function exportEnvironment(name: string, variables: KeyValue[]): string {
   return JSON.stringify(
     {
@@ -451,5 +436,3 @@ export function importEnvironment(json: string): Environment | null {
     return null
   }
 }
-
-export type { BodyType }

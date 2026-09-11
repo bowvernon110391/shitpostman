@@ -16,10 +16,6 @@ export function emptyBody(): BodyConfig {
   return { type: 'none', raw: '', rawLanguage: 'json', formData: [] }
 }
 
-export function emptyRow(): KeyValue {
-  return { id: createId('kv_'), key: '', value: '', enabled: true }
-}
-
 /** A blank request, used for the "new request" tab and as a template. */
 export function emptyRequest(): RequestConfig {
   return {

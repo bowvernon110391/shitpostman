@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Check, Download, Globe, Pencil, Plus, Sliders, Trash2, Upload } from 'lucide-react'
-import type { Environment } from '@shared/types'
+import { isFilled, type Environment } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
 import { exportEnvironment, importEnvironment } from '../../lib/postman'
@@ -27,10 +27,7 @@ export function EnvironmentPanel(): JSX.Element {
   }
 
   const handleExport = async (environment: Environment): Promise<void> => {
-    const content = exportEnvironment(
-      environment.name,
-      environment.variables.filter((row) => row.key.trim())
-    )
+    const content = exportEnvironment(environment.name, environment.variables)
     const result = await exportToFile({
       defaultPath: `${environment.name.replace(/\s+/g, '-').toLowerCase()}.environment.json`,
       content,
@@ -107,7 +104,7 @@ export function EnvironmentPanel(): JSX.Element {
                   {environment.name}
                   <span className="aero-dim">
                     {' '}
-                    · {environment.variables.filter((row) => row.key.trim()).length}
+                    · {environment.variables.filter(isFilled).length}
                   </span>
                 </span>
               )}

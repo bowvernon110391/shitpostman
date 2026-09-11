@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, Trash2 } from 'lucide-react'
-import type { KeyValue } from '@shared/types'
+import { isFilled, type KeyValue } from '@shared/types'
 import { createId } from '../../lib/ids'
 
 interface KeyValueEditorProps {
@@ -52,7 +52,7 @@ export function KeyValueEditor({
   }
 
   const gridClass = showDescription ? 'app-kv--4' : 'app-kv--3'
-  const filledCount = rows.filter((row) => row.key.trim()).length
+  const filledCount = rows.filter(isFilled).length
 
   return (
     <div className="aero-kv">
