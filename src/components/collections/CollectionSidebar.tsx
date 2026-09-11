@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Clock, Download, FolderPlus, Globe, Layers, Search, Settings, Upload, X } from 'lucide-react'
 import { useAppStore, type SidebarTab } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
+import { useScrollableTabs } from '../../lib/useScrollableTabs'
 import { CollectionTree } from './CollectionTree'
 import { EnvironmentPanel } from '../environments/EnvironmentPanel'
 import { HistoryPanel } from '../history/HistoryPanel'
@@ -26,6 +27,7 @@ export function CollectionSidebar(): JSX.Element {
   const openModal = useUiStore((state) => state.openModal)
 
   const [filter, setFilter] = useState('')
+  const tabsRef = useScrollableTabs<HTMLDivElement>(sidebarTab)
 
   const handleImport = async (): Promise<void> => {
     const content = await importFromFile({ filters: [JSON_FILTER] })
@@ -61,7 +63,7 @@ export function CollectionSidebar(): JSX.Element {
 
   return (
     <aside className="aero-sidebar">
-      <div className="aero-tabs">
+      <div className="aero-tabs" ref={tabsRef}>
         {TABS.map((tab) => (
           <button
             key={tab.id}
