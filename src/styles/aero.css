@@ -154,20 +154,32 @@ pre {
   position: absolute;
   bottom: -14vh;
   border-radius: 50%;
+  /*
+   * Soft blobs rather than crisp circles. These are meant to be felt as slow
+   * luminance drift behind the glass, so the rim is barely there and the outer
+   * glow is tight enough not to read as a distinct shape.
+   */
   background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.16) 42%, rgba(255, 255, 255, 0) 62%),
-    radial-gradient(circle at 70% 76%, rgba(160, 230, 255, 0.35), rgba(120, 200, 255, 0.05) 60%);
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.12) 48%, rgba(255, 255, 255, 0) 68%),
+    radial-gradient(circle at 70% 76%, rgba(160, 230, 255, 0.28), rgba(120, 200, 255, 0.04) 62%);
   box-shadow:
-    inset 0 0 12px rgba(255, 255, 255, 0.7),
-    inset -4px -6px 14px rgba(120, 200, 255, 0.25),
-    0 0 18px rgba(190, 240, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+    inset 0 0 12px rgba(255, 255, 255, 0.55),
+    inset -4px -6px 14px rgba(120, 200, 255, 0.18),
+    0 0 12px rgba(190, 240, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   animation: aero-bubble-rise linear infinite;
-  will-change: transform, opacity;
+  /*
+   * No will-change here on purpose. Promoting every bubble to its own layer
+   * costs memory for an effect this subtle; the transform animation already
+   * stays on the compositor. Re-add `will-change: transform` if rising motion
+   * ever stutters.
+   */
 }
 
 .aero-bubble--lg {
-  filter: blur(0.4px);
+  /* The backdrop blur only softens what shows through by a few pixels, so the
+     largest bubbles get a little bokeh of their own. */
+  filter: blur(1.6px);
 }
 
 /* ==========================================================================
@@ -311,14 +323,32 @@ pre {
   /*
    * The shell behind this is a deep-blue sky gradient and every text token
    * (--text-body, --text-on-glass, --aero-deep-800) is dark, so this needs to
-   * be its own near-opaque glass panel. Without it the request builder sits
-   * straight on navy and is unreadable.
+   * be its own light glass panel. Without it the request builder sits straight
+   * on navy and is unreadable.
+   *
+   * The alpha ramps *up* toward the bottom on purpose. The shell's gradient
+   * runs light at the top (#bfeaff) to dark at the bottom (#052b47), so the
+   * pane has to be most opaque exactly where the backdrop is darkest, otherwise
+   * contrast collapses in the lower half. Getting this backwards is what the
+   * previous values did.
+   *
+   * Left translucent rather than opaque so the rising bubble layer reads
+   * through it as ambient movement; the backdrop-filter below softens whatever
+   * comes through.
+   *
+   * Every alpha here is load-bearing in both directions: raising it hides the
+   * bubbles, lowering it lets the dark end of the shell bleed up into the text.
+   * The values were chosen by sampling rendered pixels (p05 of the backdrop
+   * luminance per region) and checking WCAG contrast — hand-mixing rgba gets
+   * this wrong by more than a full ratio point. Guardrail: --text-body
+   * (#14496e, the dominant body colour) at >= 4.5:1 against the worst 5% of
+   * backdrop pixels in every region.
    */
   background: linear-gradient(
     180deg,
-    rgba(252, 254, 255, 0.97) 0%,
-    rgba(235, 248, 255, 0.95) 42%,
-    rgba(212, 237, 251, 0.94) 100%
+    rgba(252, 254, 255, 0.8) 0%,
+    rgba(240, 250, 255, 0.81) 46%,
+    rgba(222, 242, 253, 0.85) 100%
   );
   backdrop-filter: blur(18px) saturate(1.3);
   -webkit-backdrop-filter: blur(18px) saturate(1.3);
@@ -1551,5 +1581,18 @@ textarea.aero-field {
   .aero-bubble,
   .aero-spinner {
     animation: none !important;
+  }
+
+  /*
+   * A bubble's resting position is `bottom: -14vh` — just off-screen — and it is
+   * the animation that carries it up into view and back out. Killing only the
+   * animation leaves the whole stack parked at that bottom edge with opacity 1.
+   * On a tall window that is invisible, but once the window is short enough that
+   * 14vh is smaller than the bubble, a row of solid white circles pokes into
+   * view. Hiding them outright is deterministic and costs nothing, since the
+   * frozen aurora and caustic gradients still carry the Aero look.
+   */
+  .aero-bubble {
+    opacity: 0;
   }
 }
