@@ -1,0 +1,22 @@
+# CI-only overlay on top of electron-builder.yml.
+#
+# Why this file exists instead of passing `-c.win.signAndEditExecutable=true` on
+# the command line: PowerShell (the default shell on GitHub's Windows runners)
+# splits that token into two arguments at the `=`, so yargs reads the second one
+# as a *config file path* and electron-builder dies with:
+#
+#   ENOENT: no such file or directory, open '...\.win.signAndEditExecutable=true'
+#
+# `--config electron-builder.ci.yml` is a single mangle-proof token that every
+# shell handles the same way.
+#
+# Keep this file's only job as flipping Windows exe editing on. Everything else
+# is inherited, so electron-builder.yml stays the single source of truth.
+extends: electron-builder.yml
+
+win:
+  # Local Windows builds can't do this: the winCodeSign helper archive contains
+  # macOS symlinks that 7-Zip cannot create without Developer Mode or admin
+  # rights. GitHub's Windows runners can, so CI turns it back on here to embed
+  # build/icon.png into the .exe and to leave signing available later.
+  signAndEditExecutable: true

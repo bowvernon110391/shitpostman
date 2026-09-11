@@ -51,11 +51,16 @@ jobs:
               ~/.cache/electron-builder
           - platform: windows
             os: windows-latest
-            # CI *can* create the macOS symlinks inside electron-builder's
-            # winCodeSign helper archive that the local Windows build cannot,
-            # so exe editing is re-enabled here. That is what embeds
-            # build/icon.png and what would let a certificate sign the binary.
-            args: --win -c.win.signAndEditExecutable=true
+            # electron-builder.ci.yml re-enables exe editing, which is what
+            # embeds build/icon.png and leaves signing available later. It is a
+            # config *file* rather than the usual
+            # `-c.win.signAndEditExecutable=true` because PowerShell splits that
+            # dotted token in two at the `=`, and yargs then reads the second
+            # half as a config file path:
+            #   ENOENT: ... open '...\.win.signAndEditExecutable=true'
+            # A bare filename has no dots or `=` to mangle, so this works under
+            # any shell on any runner.
+            args: --win --config electron-builder.ci.yml
             cache: |
               ~\AppData\Local\electron\Cache
               ~\AppData\Local\electron-builder\Cache
@@ -118,15 +123,10 @@ jobs:
       - name: Compile with electron-vite
         run: npm run build
 
-      # `shell: bash` is load-bearing, not cosmetic. Without it Windows uses
-      # PowerShell, which splits `-c.win.signAndEditExecutable=true` into two
-      # arguments at the `=`. yargs then reads the second one as a *config file
-      # path* and dies with:
-      #   ENOENT: no such file or directory, open '...\.win.signAndEditExecutable=true'
-      # Git Bash is preinstalled on windows-latest and passes the token through
-      # intact.
+      # Every `matrix.args` value is a plain token, so this needs no `shell:`
+      # override -- see the comment on the Windows matrix entry for why the
+      # Windows-specific config arrives as a filename instead of a `-c.` flag.
       - name: Package and publish
-        shell: bash
         run: npx electron-builder ${{ matrix.args }} --publish ${{ env.PUBLISH }}
 
       # Also keep the installers on the workflow run. Useful for dry-runs and a
