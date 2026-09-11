@@ -80,6 +80,7 @@ interface AppState {
   /* ---------------- collections ---------------- */
   addCollection: (name: string) => string
   renameCollection: (id: string, name: string) => void
+  moveCollection: (id: string, targetIndex: number) => void
   deleteCollection: (id: string) => void
   addFolder: (collectionId: string, parentId: string | null, name: string) => void
   addRequest: (collectionId: string, parentId: string | null, name: string) => void
@@ -400,6 +401,26 @@ export const useAppStore = create<AppState>((set, get) => ({
         collection.id === id ? { ...collection, name } : collection
       )
     }))
+    schedulePersist()
+  },
+
+  /**
+   * Move a collection so it ends up at `targetIndex` in the list.
+   * The index is relative to the list *after* the collection is lifted out,
+   * which is the slot the drop indicator shows the user.
+   */
+  moveCollection: (id, targetIndex) => {
+    const { collections } = get()
+    const from = collections.findIndex((collection) => collection.id === id)
+    if (from < 0) return
+
+    const next = [...collections]
+    const [moved] = next.splice(from, 1)
+    const to = Math.max(0, Math.min(targetIndex, next.length))
+    if (to === from) return
+
+    next.splice(to, 0, moved)
+    set({ collections: next })
     schedulePersist()
   },
 

@@ -1057,6 +1057,33 @@ textarea.aero-field {
     0 0 12px rgba(111, 191, 53, 0.5);
 }
 
+/* Insertion marker shown while reordering collections */
+.aero-tree__drop-line {
+  height: 2px;
+  margin: 1px 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(111, 191, 53, 0),
+    rgba(111, 191, 53, 0.95) 22%,
+    rgba(111, 191, 53, 0.95) 78%,
+    rgba(111, 191, 53, 0)
+  );
+  box-shadow: 0 0 6px rgba(111, 191, 53, 0.65);
+}
+
+/* Drop zone below the last collection, so items can be sent to the bottom */
+.aero-tree__tail {
+  min-height: 34px;
+  margin-top: 2px;
+  border-radius: var(--r-sm);
+  transition: background 0.13s var(--ease-out);
+}
+
+.aero-tree__tail--active {
+  background: linear-gradient(180deg, rgba(111, 191, 53, 0.16), rgba(111, 191, 53, 0.03));
+}
+
 .aero-tree__twisty {
   display: grid;
   place-items: center;

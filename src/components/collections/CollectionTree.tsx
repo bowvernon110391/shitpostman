@@ -58,12 +58,14 @@ interface RowProps {
   renameValue?: string
   onRenameChange?: (value: string) => void
   onRenameCommit?: () => void
+  onRenameCancel?: () => void
   onClick: () => void
   onContextMenu: (event: MouseEvent) => void
   onDragStart?: (event: DragEvent) => void
   onDragOver?: (event: DragEvent) => void
   onDragLeave?: (event: DragEvent) => void
   onDrop?: (event: DragEvent) => void
+  onDragEnd?: (event: DragEvent) => void
   actions?: JSX.Element
 }
 
@@ -79,12 +81,14 @@ function Row({
   renameValue = '',
   onRenameChange,
   onRenameCommit,
+  onRenameCancel,
   onClick,
   onContextMenu,
   onDragStart,
   onDragOver,
   onDragLeave,
   onDrop,
+  onDragEnd,
   actions
 }: RowProps): JSX.Element {
   return (
@@ -100,6 +104,7 @@ function Row({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      onDragEnd={onDragEnd}
       role="treeitem"
       aria-selected={active}
     >
@@ -124,7 +129,7 @@ function Row({
           onBlur={() => onRenameCommit?.()}
           onKeyDown={(event) => {
             if (event.key === 'Enter') onRenameCommit?.()
-            if (event.key === 'Escape') onRenameCommit?.()
+            if (event.key === 'Escape') onRenameCancel?.()
           }}
         />
       ) : (
@@ -158,6 +163,7 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
   const addFolder = useAppStore((state) => state.addFolder)
   const addRequest = useAppStore((state) => state.addRequest)
   const renameCollection = useAppStore((state) => state.renameCollection)
+  const moveCollection = useAppStore((state) => state.moveCollection)
   const deleteCollection = useAppStore((state) => state.deleteCollection)
   const moveNode = useAppStore((state) => state.moveNode)
   const notify = useAppStore((state) => state.notify)
@@ -169,7 +175,9 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [dragId, setDragId] = useState<string | null>(null)
+  const [dragCollectionId, setDragCollectionId] = useState<string | null>(null)
   const [dropId, setDropId] = useState<string | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
 
   // A rename started elsewhere should win, and cancelling clears the field.
   useEffect(() => {
@@ -185,6 +193,11 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
     [collections, filter]
   )
 
+  // Slot just past the last visible collection, used by the end-of-list drop zone.
+  const tailSlot = visible.length
+    ? collections.findIndex((c) => c.id === visible[visible.length - 1].id) + 1
+    : 0
+
   const startRename = (id: string, current: string): void => {
     setRenamingId(id)
     setRenameValue(current)
@@ -198,6 +211,24 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
       else renameItem(renamingId, name)
     }
     setRenamingId(null)
+  }
+
+  const endDrag = (): void => {
+    setDragId(null)
+    setDragCollectionId(null)
+    setDropIndex(null)
+    setDropId(null)
+  }
+
+  /**
+   * Drop the dragged collection at the slot the indicator was drawn at. Lifting
+   * the collection out shifts every later slot down one, so compensate.
+   */
+  const dropCollectionAt = (slot: number): void => {
+    if (!dragCollectionId) return
+    const sourceIndex = collections.findIndex((c) => c.id === dragCollectionId)
+    if (sourceIndex < 0) return
+    moveCollection(dragCollectionId, slot - (sourceIndex < slot ? 1 : 0))
   }
 
   const requestMenu = (
@@ -293,6 +324,7 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
 
   const collectionMenu = (event: MouseEvent, collection: Collection): void => {
     event.preventDefault()
+    event.stopPropagation()
     openMenu(event.clientX, event.clientY, [
       {
         label: 'New request',
@@ -365,6 +397,7 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
             renameValue={renameValue}
             onRenameChange={setRenameValue}
             onRenameCommit={() => commitRename(null)}
+            onRenameCancel={() => setRenamingId(null)}
             onClick={() => {
               selectNode(item.id)
               toggleCollapse(item.id)
@@ -378,16 +411,20 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
             onDragOver={(event) => {
               event.preventDefault()
               event.stopPropagation()
+              // Collections reorder against collection headers, not nodes.
+              if (dragCollectionId) return
               setDropId(item.id)
             }}
             onDragLeave={() => setDropId((current) => (current === item.id ? null : current))}
             onDrop={(event) => {
               event.preventDefault()
               event.stopPropagation()
+              if (dragCollectionId) return
               setDropId(null)
               if (dragId && dragId !== item.id) moveNode(dragId, item.id)
               setDragId(null)
             }}
+            onDragEnd={endDrag}
             actions={
               <>
                 <button
@@ -443,6 +480,7 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
         renameValue={renameValue}
         onRenameChange={setRenameValue}
         onRenameCommit={() => commitRename(null)}
+        onRenameCancel={() => setRenamingId(null)}
         onClick={() => openRequest(item.id)}
         onContextMenu={(event) => requestMenu(event, item)}
         onDragStart={(event) => {
@@ -450,6 +488,7 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
           setDragId(item.id)
           event.dataTransfer.effectAllowed = 'move'
         }}
+        onDragEnd={endDrag}
       />
     )
   }
@@ -478,8 +517,11 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
 
   return (
     <div className="aero-tree aero-scroll" onContextMenu={emptyMenu} role="tree">
-      {visible.map((collection) => (
+      {visible.map((collection) => {
+        const hIndex = collections.findIndex((c) => c.id === collection.id)
+        return (
         <div key={collection.id}>
+          {dropIndex === hIndex ? <div className="aero-tree__drop-line" /> : null}
           <Row
             icon={<Layers size={13} />}
             label={`${collection.name} (${countRequests(collection.items)})`}
@@ -487,23 +529,52 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
             dropTarget={dropId === collection.id}
             active={false}
             twisty={collection.collapsed ? 'closed' : 'open'}
+            draggable
             renaming={renamingId === collection.id}
             renameValue={renameValue}
             onRenameChange={setRenameValue}
             onRenameCommit={() => commitRename(collection.id)}
+            onRenameCancel={() => setRenamingId(null)}
             onClick={() => toggleCollapse(collection.id)}
             onContextMenu={(event) => collectionMenu(event, collection)}
+            onDragStart={(event) => {
+              event.stopPropagation()
+              setDragId(collection.id)
+              setDragCollectionId(collection.id)
+              setDropId(null)
+              event.dataTransfer.effectAllowed = 'move'
+            }}
             onDragOver={(event) => {
               event.preventDefault()
-              setDropId(collection.id)
+              event.stopPropagation()
+              if (dragCollectionId) {
+                const rect = event.currentTarget.getBoundingClientRect()
+                const below = event.clientY - rect.top > rect.height / 2
+                setDropIndex(below ? hIndex + 1 : hIndex)
+              } else {
+                setDropId(collection.id)
+              }
             }}
-            onDragLeave={() => setDropId((current) => (current === collection.id ? null : current))}
+            onDragLeave={() => {
+              if (!dragCollectionId) {
+                setDropId((current) => (current === collection.id ? null : current))
+              }
+            }}
             onDrop={(event) => {
               event.preventDefault()
-              setDropId(null)
-              if (dragId) moveNode(dragId, null)
-              setDragId(null)
+              event.stopPropagation()
+
+              if (dragCollectionId) {
+                const rect = event.currentTarget.getBoundingClientRect()
+                const below = event.clientY - rect.top > rect.height / 2
+                dropCollectionAt(below ? hIndex + 1 : hIndex)
+              } else if (dragId) {
+                moveNode(dragId, null)
+              }
+
+              endDrag()
             }}
+            onDragEnd={endDrag}
             actions={
               <>
                 <button
@@ -546,7 +617,35 @@ export function CollectionTree({ filter }: TreeProps): JSX.Element {
             </div>
           ) : null}
         </div>
-      ))}
+        )
+      })}
+
+      {/*
+        Slot past the last collection. Every other slot is drawn as the
+        "before" line of the collection that follows it, so drawing this one
+        here keeps each slot to exactly one marker.
+      */}
+      {dropIndex === tailSlot ? <div className="aero-tree__drop-line" /> : null}
+
+      {/* Drop zone past the last collection, so an item can be sent to the very bottom. */}
+      {dragCollectionId ? (
+        <div
+          className={`aero-tree__tail${
+            dropIndex === tailSlot ? ' aero-tree__tail--active' : ''
+          }`}
+          onDragOver={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            setDropIndex(tailSlot)
+          }}
+          onDrop={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            dropCollectionAt(tailSlot)
+            endDrag()
+          }}
+        />
+      ) : null}
     </div>
   )
 }
