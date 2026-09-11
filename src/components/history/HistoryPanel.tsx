@@ -3,6 +3,7 @@ import type { HistoryEntry } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
 import { MethodPill } from '../ui/MethodPill'
+import { SettingsButton } from '../ui/SettingsButton'
 import { timeAgo, formatDuration, statusTone } from '../../lib/format'
 
 /** Sidebar panel listing previously sent requests. */
@@ -15,13 +16,19 @@ export function HistoryPanel(): JSX.Element {
 
   if (history.length === 0) {
     return (
-      <div className="aero-tree aero-scroll">
-        <div className="app-placeholder" style={{ height: 'auto', paddingTop: 40 }}>
-          <Clock size={28} className="aero-dim" />
-          <span className="app-placeholder__title">No history yet</span>
-          <span className="app-placeholder__hint">Requests you send show up here.</span>
+      <>
+        <div className="aero-tree aero-scroll">
+          <div className="app-placeholder" style={{ height: 'auto', paddingTop: 40 }}>
+            <Clock size={28} className="aero-dim" />
+            <span className="app-placeholder__title">No history yet</span>
+            <span className="app-placeholder__hint">Requests you send show up here.</span>
+          </div>
         </div>
-      </div>
+        <div className="app-sidebar__foot">
+          <span className="app-sidebar__foot-spacer" />
+          <SettingsButton />
+        </div>
+      </>
     )
   }
 
@@ -112,6 +119,7 @@ export function HistoryPanel(): JSX.Element {
         <span className="aero-dim" style={{ fontSize: 11 }}>
           {history.length} entries
         </span>
+        <SettingsButton />
       </div>
     </>
   )

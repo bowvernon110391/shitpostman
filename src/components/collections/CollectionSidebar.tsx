@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Clock, Download, FolderPlus, Globe, Layers, Search, Settings, Upload, X } from 'lucide-react'
+import { Clock, Download, FolderPlus, Globe, Layers, Search, Upload, X } from 'lucide-react'
 import { useAppStore, type SidebarTab } from '../../store/useAppStore'
-import { useUiStore } from '../../store/useUiStore'
 import { useScrollableTabs } from '../../lib/useScrollableTabs'
+import { SettingsButton } from '../ui/SettingsButton'
 import { CollectionTree } from './CollectionTree'
 import { EnvironmentPanel } from '../environments/EnvironmentPanel'
 import { HistoryPanel } from '../history/HistoryPanel'
@@ -24,7 +24,6 @@ export function CollectionSidebar(): JSX.Element {
   const importCollections = useAppStore((state) => state.importCollections)
   const addCollection = useAppStore((state) => state.addCollection)
   const notify = useAppStore((state) => state.notify)
-  const openModal = useUiStore((state) => state.openModal)
 
   const [filter, setFilter] = useState('')
   const tabsRef = useScrollableTabs<HTMLDivElement>(sidebarTab)
@@ -110,43 +109,38 @@ export function CollectionSidebar(): JSX.Element {
       {sidebarTab === 'environments' ? <EnvironmentPanel /> : null}
       {sidebarTab === 'history' ? <HistoryPanel /> : null}
 
-      <div className="app-sidebar__foot">
-        <button
-          type="button"
-          className="aero-button aero-button--sm"
-          onClick={() => addCollection('New collection')}
-          title="New collection"
-        >
-          <FolderPlus size={12} />
-          New
-        </button>
-        <button
-          type="button"
-          className="aero-button aero-button--sm"
-          onClick={() => void handleImport()}
-          title="Import a Postman collection"
-        >
-          <Upload size={12} />
-          Import
-        </button>
-        <span className="app-sidebar__foot-spacer" />
-        <button
-          type="button"
-          className="aero-button aero-button--icon aero-button--ghost"
-          onClick={() => void handleExportAll()}
-          title="Export all collections"
-        >
-          <Download size={13} />
-        </button>
-        <button
-          type="button"
-          className="aero-button aero-button--icon aero-button--ghost"
-          onClick={() => openModal('settings')}
-          title="Settings"
-        >
-          <Settings size={13} />
-        </button>
-      </div>
+      {sidebarTab === 'collections' ? (
+        <div className="app-sidebar__foot">
+          <button
+            type="button"
+            className="aero-button aero-button--sm"
+            onClick={() => addCollection('New collection')}
+            title="New collection"
+          >
+            <FolderPlus size={12} />
+            New
+          </button>
+          <button
+            type="button"
+            className="aero-button aero-button--sm"
+            onClick={() => void handleImport()}
+            title="Import a Postman collection"
+          >
+            <Upload size={12} />
+            Import
+          </button>
+          <span className="app-sidebar__foot-spacer" />
+          <button
+            type="button"
+            className="aero-button aero-button--icon aero-button--ghost"
+            onClick={() => void handleExportAll()}
+            title="Export all collections"
+          >
+            <Download size={13} />
+          </button>
+          <SettingsButton />
+        </div>
+      ) : null}
     </aside>
   )
 }

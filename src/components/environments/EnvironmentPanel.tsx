@@ -5,6 +5,7 @@ import { useAppStore } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
 import { exportEnvironment, importEnvironment } from '../../lib/postman'
 import { exportToFile, importFromFile, JSON_FILTER } from '../../lib/fileIO'
+import { SettingsButton } from '../ui/SettingsButton'
 
 /** Sidebar panel listing saved environments. */
 export function EnvironmentPanel(): JSX.Element {
@@ -193,6 +194,7 @@ export function EnvironmentPanel(): JSX.Element {
           Import
         </button>
         <span className="app-sidebar__foot-spacer" />
+        <SettingsButton />
       </div>
     </>
   )
