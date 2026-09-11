@@ -5,6 +5,10 @@
   "main": "./out/main/index.js",
   "author": "Bowie",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bowvernon110391/shitpostman.git"
+  },
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",
@@ -13,7 +17,9 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "package": "electron-vite build && electron-builder --win --config electron-builder.yml"
+    "package": "electron-vite build && electron-builder --win --config electron-builder.yml --publish never",
+    "dist": "electron-vite build && electron-builder --publish never",
+    "release": "electron-vite build && electron-builder --publish always"
   },
   "dependencies": {
     "axios": "^1.7.7",

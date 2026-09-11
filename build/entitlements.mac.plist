@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!--
+      Hardened Runtime exceptions required by Electron's V8 engine.
+
+      `allow-jit` lets V8 map memory as executable for its JIT compiler.
+      `allow-unsigned-executable-memory` covers the memory it writes to before
+      marking it executable.
+
+      Removing either causes an immediate crash on launch on arm64 builds with
+      Electron 20+. These are only read when the app is code-signed; while the
+      release is unsigned they are simply ignored.
+    -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+  </dict>
+</plist>

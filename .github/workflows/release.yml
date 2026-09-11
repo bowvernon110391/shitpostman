@@ -1,0 +1,137 @@
+name: Release
+
+# Builds the Windows, macOS and Linux installers and attaches them to a *draft*
+# GitHub Release, which stays invisible until you publish it by hand.
+#
+# Runs automatically when a v*.*.* tag is pushed. Can also be started by hand
+# from the Actions tab, which builds everything but does not publish, so the
+# pipeline can be dry-run without creating a release.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+# Required for uploading release assets. Without this the publisher fails with
+# "Resource not accessible by integration".
+permissions:
+  contents: write
+
+# Stops two pushes of the same tag from fighting over the same release.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    env:
+      # `--publish always` only when the ref is a v* version tag; a manual run
+      # compiles and packages but leaves GitHub untouched.
+      PUBLISH: ${{ startsWith(github.ref, 'refs/tags/v') && 'always' || 'never' }}
+      # Recognised by electron-builder's GitHub publisher.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+      # A failure on one platform should not cancel the others, so all three
+      # logs land in the same run.
+      fail-fast: false
+      # If two jobs ever race to create the same draft release, add
+      # `max-parallel: 1` here to serialise them.
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            args: --linux
+            cache: |
+              ~/.cache/electron
+              ~/.cache/electron-builder
+          - platform: windows
+            os: windows-latest
+            # CI *can* create the macOS symlinks inside electron-builder's
+            # winCodeSign helper archive that the local Windows build cannot,
+            # so exe editing is re-enabled here. That is what embeds
+            # build/icon.png and what would let a certificate sign the binary.
+            args: --win -c.win.signAndEditExecutable=true
+            cache: |
+              ~\AppData\Local\electron\Cache
+              ~\AppData\Local\electron-builder\Cache
+          - platform: macos
+            os: macos-latest
+            # Both architectures, built from the arm64 runner. There are no
+            # native modules in this project, so electron-builder just
+            # downloads the matching Electron binaries; nothing is compiled.
+            # Drop --x64 if only Apple Silicon matters.
+            args: --mac --x64 --arm64
+            cache: |
+              ~/Library/Caches/electron
+              ~/Library/Caches/electron-builder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Electron and electron-builder both download large, versioned archives
+      # (the Electron runtime, winCodeSign, nsis, appimagetool, dmg-builder).
+      # Caching them takes minutes off repeat releases and insulates the build
+      # from upstream download outages.
+      - name: Cache Electron tooling downloads
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.cache }}
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
+
+      # `npm ci` installs exactly what package-lock.json pins.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      # Guards against tagging v1.2.0 while package.json still says 1.0.0, which
+      # would silently publish installers with the wrong version baked in.
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::package.json says $PKG_VERSION but the tag is $GITHUB_REF_NAME. Bump the version (or retag) so the two agree."
+            exit 1
+          fi
+          echo "Version $PKG_VERSION matches tag $GITHUB_REF_NAME."
+
+      # electron-builder packages whatever is already in `out/`, so the
+      # electron-vite compile has to happen first.
+      - name: Compile with electron-vite
+        run: npm run build
+
+      - name: Package and publish
+        run: npx electron-builder ${{ matrix.args }} --publish ${{ env.PUBLISH }}
+
+      # Also keep the installers on the workflow run. Useful for dry-runs and a
+      # backup if a release upload goes wrong.
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-installers
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.blockmap
+            dist/latest*.yml

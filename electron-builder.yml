@@ -16,12 +16,14 @@ win:
       arch:
         - x64
   artifactName: ${productName}-${version}-setup.${ext}
-  # Building an unsigned installer locally. electron-builder's `winCodeSign`
-  # helper archive contains macOS symlinks that 7-Zip cannot create on Windows
-  # without Developer Mode / admin rights, which aborts packaging. Nothing is
-  # lost here because no certificate and no custom icon are configured.
-  # Enable Developer Mode (or run elevated) and flip this back to true if you
-  # later add an icon in `build/` or a code-signing certificate.
+  # Local Windows builds stay unsigned. electron-builder's `winCodeSign` helper
+  # archive contains macOS symlinks that 7-Zip cannot create on Windows without
+  # Developer Mode / admin rights, which aborts packaging.
+  #
+  # CI overrides this from the command line (`-c.win.signAndEditExecutable=true`)
+  # because the GitHub Windows runners can create the symlinks. That override is
+  # what lets release installers embed the app icon and be code-signed later.
+  # To get the same locally, enable Developer Mode and flip this to true.
   signAndEditExecutable: false
 
 nsis:
@@ -36,8 +38,23 @@ mac:
   target:
     - dmg
   category: public.app-category.developer-tools
+  artifactName: ${productName}-${version}-${arch}.${ext}
 
 linux:
   target:
     - AppImage
   category: Development
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+# Release assets are uploaded by `electron-builder --publish always`, which
+# `.github/workflows/release.yml` runs on every `v*.*.*` tag. `releaseType:
+# draft` keeps the three platform jobs attached to one draft release that stays
+# invisible until you publish it by hand.
+#
+# `owner`/`repo` are pinned explicitly rather than relying on git remote
+# detection, so publishing works regardless of how the runner checked out.
+publish:
+  provider: github
+  owner: bowvernon110391
+  repo: shitpostman
+  releaseType: draft
