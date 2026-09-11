@@ -118,7 +118,15 @@ jobs:
       - name: Compile with electron-vite
         run: npm run build
 
+      # `shell: bash` is load-bearing, not cosmetic. Without it Windows uses
+      # PowerShell, which splits `-c.win.signAndEditExecutable=true` into two
+      # arguments at the `=`. yargs then reads the second one as a *config file
+      # path* and dies with:
+      #   ENOENT: no such file or directory, open '...\.win.signAndEditExecutable=true'
+      # Git Bash is preinstalled on windows-latest and passes the token through
+      # intact.
       - name: Package and publish
+        shell: bash
         run: npx electron-builder ${{ matrix.args }} --publish ${{ env.PUBLISH }}
 
       # Also keep the installers on the workflow run. Useful for dry-runs and a
