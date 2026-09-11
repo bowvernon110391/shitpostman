@@ -135,12 +135,14 @@ function JsonRow({
 
         <button
           type="button"
-          className="app-json__copy"
+          className={`app-json__copy aero-button aero-button--copy aero-button--icon${
+            copied ? ' aero-button--copied' : ''
+          }`}
           onClick={copy}
           title="Copy value"
           aria-label="Copy value"
         >
-          {copied ? <Check size={10} /> : <Copy size={10} />}
+          {copied ? <Check size={11} /> : <Copy size={11} />}
         </button>
       </div>
 

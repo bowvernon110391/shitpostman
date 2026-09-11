@@ -258,11 +258,27 @@
 
 .app-json__copy {
   margin-left: 8px;
+  flex: 0 0 auto;
   opacity: 0;
   transition: opacity 0.14s var(--ease-out);
 }
 
-.app-json__row:hover > .app-json__copy {
+/*
+ * The JSON tree is dense and every row carries one of these, so the shared
+ * copy chip is dialled down to a micro chip here. It keeps the glass look and
+ * the green success flash, but at a size that fits inside the line box instead
+ * of inflating the row. Left faintly visible so it is discoverable, then fully
+ * opaque on row hover. Three classes deep to beat the chip's own rule.
+ */
+.app-json__copy.aero-button--copy.aero-button--icon {
+  width: 18px;
+  min-height: 18px;
+  padding: 0;
+  border-radius: 5px;
+  opacity: 0.35;
+}
+
+.app-json__row:hover > .app-json__copy.aero-button--copy.aero-button--icon {
   opacity: 1;
 }
 

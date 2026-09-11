@@ -318,8 +318,9 @@ export function ResponsePanel(): JSX.Element {
       {responseTab === 'headers' ? (
         <div className="app-pane__body aero-scroll">
           <div className="aero-kv">
-            <div className="aero-kv__head app-kv--3" style={{ gridTemplateColumns: '1fr 1.6fr 26px' }}>
-              <span />
+            {/* Three tracks only: name, value, copy action. A stray leading
+                span here used to shift the captions a column right. */}
+            <div className="aero-kv__head" style={{ gridTemplateColumns: '1fr 1.6fr 34px' }}>
               <span>Header</span>
               <span>Value</span>
               <span />
@@ -328,13 +329,13 @@ export function ResponsePanel(): JSX.Element {
               <div
                 key={name}
                 className="aero-kv__row"
-                style={{ gridTemplateColumns: '1fr 1.6fr 26px' }}
+                style={{ gridTemplateColumns: '1fr 1.6fr 34px' }}
               >
                 <span className="app-json__key aero-selectable">{name}</span>
                 <span className="aero-mono aero-selectable aero-ellipsis" title={value}>
                   {value}
                 </span>
-                <CopyButton value={value} label="Copy value" size={12} />
+                <CopyButton value={value} label="value" iconOnly size={13} />
               </div>
             ))}
           </div>
@@ -351,7 +352,7 @@ export function ResponsePanel(): JSX.Element {
                     <span className="app-list__title aero-mono aero-selectable">{cookie}</span>
                   </div>
                   <div className="app-list__actions">
-                    <CopyButton value={cookie} label="Copy cookie" size={12} />
+                    <CopyButton value={cookie} label="cookie" iconOnly size={13} />
                   </div>
                 </div>
               ))}

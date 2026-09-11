@@ -6,10 +6,22 @@ interface CopyButtonProps {
   label?: string
   className?: string
   size?: number
+  /**
+   * Show the icon on its own. `label` still supplies the tooltip and the
+   * accessible name, so screen readers keep the wording that the visible
+   * text used to provide.
+   */
+  iconOnly?: boolean
 }
 
 /** Copies `value` to the clipboard and flashes a tick on success. */
-export function CopyButton({ value, label, className = '', size = 13 }: CopyButtonProps): JSX.Element {
+export function CopyButton({
+  value,
+  label,
+  className = '',
+  size = 13,
+  iconOnly = false
+}: CopyButtonProps): JSX.Element {
   const [copied, setCopied] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -40,12 +52,30 @@ export function CopyButton({ value, label, className = '', size = 13 }: CopyButt
     timer.current = setTimeout(() => setCopied(false), 1400)
   }
 
+  const title = label ? `Copy ${label}` : 'Copy'
+
+  if (iconOnly) {
+    return (
+      <button
+        type="button"
+        className={`aero-button aero-button--copy aero-button--icon${
+          copied ? ' aero-button--copied' : ''
+        } ${className}`.trim()}
+        onClick={() => void copy()}
+        title={title}
+        aria-label={title}
+      >
+        {copied ? <Check size={size} /> : <Copy size={size} />}
+      </button>
+    )
+  }
+
   return (
     <button
       type="button"
       className={`aero-button aero-button--ghost aero-button--sm ${className}`.trim()}
       onClick={() => void copy()}
-      title={label ? `Copy ${label}` : 'Copy'}
+      title={title}
     >
       {copied ? <Check size={size} /> : <Copy size={size} />}
       {label ? <span>{copied ? 'Copied' : label}</span> : null}

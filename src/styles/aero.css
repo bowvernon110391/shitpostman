@@ -564,6 +564,57 @@ pre {
   border-radius: var(--r-sm);
 }
 
+/*
+ * Copy chip. These sit inline in dense tables (response headers, cookies)
+ * beside dark-on-light text. The plain ghost variant was so washed out over
+ * the pane that the controls were easy to miss, so this keeps a tinted glass
+ * surface visible at rest plus a glossy bevel, and flashes green on success.
+ * Defined after --sm/--ghost so it wins the padding and colour they set.
+ */
+.aero-button--copy {
+  width: auto;
+  min-height: 26px;
+  padding: 0 9px;
+  gap: 5px;
+  border-radius: 7px;
+  color: #08456f;
+  background: linear-gradient(180deg, #ffffff 0%, #dcefff 42%, #9fd0ef 52%, #c3e5fa 100%);
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.98) inset,
+    0 -7px 12px rgba(96, 172, 222, 0.5) inset,
+    0 1px 4px rgba(9, 55, 92, 0.3),
+    0 0 0 1px rgba(52, 132, 190, 0.55);
+}
+
+.aero-button--copy:hover {
+  color: #06324f;
+  filter: brightness(1.03);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 -7px 14px rgba(78, 164, 222, 0.66) inset,
+    0 3px 11px rgba(9, 55, 92, 0.34),
+    0 0 0 1px rgba(30, 116, 178, 0.7);
+}
+
+/* Square chip when the wording is hidden. */
+.aero-button--copy.aero-button--icon {
+  width: 26px;
+  padding: 0;
+}
+
+/* Success flash once the clipboard write resolves. */
+.aero-button--copied,
+.aero-button--copied:hover {
+  color: #0c5423;
+  background: linear-gradient(180deg, #f4ffea 0%, #d5f6b0 46%, #a9e46f 54%, #cdf09c 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.98) inset,
+    0 -6px 10px rgba(126, 198, 88, 0.4) inset,
+    0 1px 3px rgba(30, 80, 20, 0.26),
+    0 0 0 1px rgba(96, 170, 60, 0.42);
+}
+
 /* ==========================================================================
    Inputs — sunk glass wells
    ========================================================================== */
