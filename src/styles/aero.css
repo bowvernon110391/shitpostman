@@ -1,0 +1,1504 @@
+/* ==========================================================================
+   Base reset + document chrome
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-body);
+  background: var(--aero-deep-900);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  user-select: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: var(--aero-blue-600);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(43, 161, 227, 0.85);
+  outline-offset: 1px;
+}
+
+/* Text meant to be copied should be selectable; chrome should not be. */
+.aero-selectable,
+input,
+textarea,
+code,
+pre {
+  user-select: text;
+  cursor: auto;
+}
+
+/* ==========================================================================
+   Animated Aero wallpaper
+   Sky gradient + aurora ribbons + bokeh + rising bubbles + caustics
+   ========================================================================== */
+
+.aero-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 50% -20%, #bfeaff 0%, #7cc9f2 26%, #2f8fd0 55%, #0c4d7d 82%, #052b47 100%);
+  overflow: hidden;
+}
+
+/* Aurora ribbons */
+.aero-shell::before {
+  content: '';
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 30% at 18% 22%, rgba(180, 255, 220, 0.55), transparent 62%),
+    radial-gradient(34% 26% at 82% 14%, rgba(140, 220, 255, 0.55), transparent 64%),
+    radial-gradient(40% 30% at 66% 74%, rgba(190, 150, 255, 0.35), transparent 66%),
+    radial-gradient(30% 24% at 26% 80%, rgba(255, 240, 170, 0.28), transparent 62%);
+  filter: blur(46px) saturate(1.35);
+  animation: aero-aurora 34s var(--ease-out) infinite;
+  opacity: 0.85;
+}
+
+/* Caustic water shimmer */
+.aero-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0.09) 0px,
+      rgba(255, 255, 255, 0) 26px,
+      rgba(255, 255, 255, 0.06) 52px,
+      rgba(255, 255, 255, 0) 84px
+    ),
+    repeating-linear-gradient(
+      -102deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0) 34px,
+      rgba(255, 255, 255, 0.08) 70px,
+      rgba(255, 255, 255, 0) 118px
+    );
+  mix-blend-mode: soft-light;
+  animation: aero-caustics 40s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+/* --------------------------- bubble layer --------------------------- */
+
+.aero-bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aero-bubble {
+  position: absolute;
+  bottom: -14vh;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.16) 42%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(circle at 70% 76%, rgba(160, 230, 255, 0.35), rgba(120, 200, 255, 0.05) 60%);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.7),
+    inset -4px -6px 14px rgba(120, 200, 255, 0.25),
+    0 0 18px rgba(190, 240, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  animation: aero-bubble-rise linear infinite;
+  will-change: transform, opacity;
+}
+
+.aero-bubble--lg {
+  filter: blur(0.4px);
+}
+
+/* ==========================================================================
+   Window chrome
+   ========================================================================== */
+
+.aero-titlebar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--titlebar-h);
+  padding: 0 6px 0 12px;
+  flex: 0 0 auto;
+  background: var(--glass-chrome);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 -8px 16px rgba(120, 190, 235, 0.25) inset,
+    0 4px 14px rgba(5, 40, 70, 0.3);
+  -webkit-app-region: drag;
+}
+
+.aero-titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.32px;
+  color: var(--text-strong);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+}
+
+.aero-titlebar__brand em {
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.6;
+  letter-spacing: 0;
+}
+
+.aero-titlebar__spacer {
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.aero-titlebar__center {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.aero-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.aero-window-control {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  color: var(--text-strong);
+  transition: background 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out),
+    color 0.15s var(--ease-out);
+}
+
+.aero-window-control:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(190, 230, 255, 0.75));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 6px rgba(10, 60, 100, 0.28);
+}
+
+.aero-window-control:active {
+  background: linear-gradient(180deg, rgba(170, 215, 245, 0.9), rgba(220, 240, 255, 0.85));
+  box-shadow: var(--shadow-inset-sunk);
+}
+
+.aero-window-control--close:hover {
+  background: linear-gradient(180deg, #ff9c8c, #e0472f);
+  color: #fff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 2px 8px rgba(160, 30, 10, 0.5);
+}
+
+/* ==========================================================================
+   Layout regions
+   ========================================================================== */
+
+.aero-body {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0;
+  padding: 0 0 0 0;
+}
+
+.aero-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--sidebar-w);
+  width: var(--sidebar-w);
+  min-height: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(228, 246, 255, 0.55) 42%,
+    rgba(186, 228, 250, 0.5) 100%
+  );
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.35) inset,
+    4px 0 18px rgba(8, 48, 80, 0.18);
+}
+
+.aero-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  /*
+   * The shell behind this is a deep-blue sky gradient and every text token
+   * (--text-body, --text-on-glass, --aero-deep-800) is dark, so this needs to
+   * be its own near-opaque glass panel. Without it the request builder sits
+   * straight on navy and is unreadable.
+   */
+  background: linear-gradient(
+    180deg,
+    rgba(252, 254, 255, 0.97) 0%,
+    rgba(235, 248, 255, 0.95) 42%,
+    rgba(212, 237, 251, 0.94) 100%
+  );
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+}
+
+.aero-statusbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--statusbar-h);
+  padding: 0 12px;
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: var(--text-strong);
+  background: var(--glass-chrome);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 -5px 14px rgba(10, 60, 100, 0.2);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.aero-statusbar__spacer {
+  flex: 1 1 auto;
+}
+
+.aero-statusbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Section headers & dividers
+   ========================================================================== */
+
+.aero-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  flex: 0 0 auto;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.88),
+    rgba(214, 240, 255, 0.62)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -6px 12px rgba(140, 200, 240, 0.22) inset;
+  -webkit-app-region: no-drag;
+}
+
+.aero-section__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.62px;
+  text-transform: uppercase;
+  color: var(--aero-deep-800);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.aero-section__spacer {
+  flex: 1 1 auto;
+}
+
+.aero-divider {
+  height: 1px;
+  margin: 6px 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.9),
+    rgba(160, 205, 235, 0.5),
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0)
+  );
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ==========================================================================
+   Buttons — glossy, gummy, skeuomorphic
+   ========================================================================== */
+
+.aero-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 13px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, #ffffff 0%, #e6f5ff 46%, #bfe3f8 52%, #a8d5ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -7px 12px rgba(150, 205, 240, 0.5) inset,
+    0 2px 5px rgba(9, 55, 92, 0.26),
+    0 0 0 1px rgba(14, 90, 145, 0.14);
+  transition: transform 0.12s var(--ease-spring), box-shadow 0.16s var(--ease-out),
+    filter 0.16s var(--ease-out);
+}
+
+/* Sliding sheen */
+.aero-button::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 0;
+  width: 40%;
+  height: 220%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0)
+  );
+  transform: translateX(-160%) skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.aero-button:hover::after {
+  opacity: 1;
+  animation: aero-sheen 0.85s var(--ease-out);
+}
+
+.aero-button:hover {
+  filter: brightness(1.045);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.98) inset,
+    0 -7px 14px rgba(150, 205, 240, 0.6) inset,
+    0 4px 12px rgba(9, 55, 92, 0.32),
+    0 0 0 1px rgba(14, 90, 145, 0.2);
+}
+
+.aero-button:active {
+  transform: translateY(1px) scale(0.985);
+  background: linear-gradient(180deg, #cfe9f8 0%, #b3dcf3 50%, #9ed0ec 100%);
+  box-shadow:
+    0 2px 6px rgba(9, 55, 92, 0.3) inset,
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 0 0 1px rgba(14, 90, 145, 0.24);
+}
+
+.aero-button:disabled {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.aero-button:disabled::after {
+  display: none;
+}
+
+/* ---- Variants ---- */
+
+.aero-button--primary {
+  color: #0d3f1c;
+  background: linear-gradient(180deg, #f2ffe6 0%, #d3f6ab 44%, #9ee05c 52%, #6fc22f 100%);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -8px 14px rgba(120, 190, 70, 0.5) inset,
+    0 2px 6px rgba(30, 80, 20, 0.32),
+    0 0 0 1px rgba(60, 130, 30, 0.24);
+}
+
+.aero-button--primary:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.98) inset,
+    0 -8px 16px rgba(120, 190, 70, 0.62) inset,
+    0 4px 14px rgba(30, 80, 20, 0.4),
+    0 0 0 1px rgba(60, 130, 30, 0.3);
+}
+
+.aero-button--primary:active {
+  background: linear-gradient(180deg, #b8e88a 0%, #93d552 52%, #6cb72e 100%);
+}
+
+.aero-button--danger {
+  color: #5c1408;
+  background: linear-gradient(180deg, #fff1ee 0%, #ffc9bd 44%, #ff9583 52%, #ef6a51 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -8px 14px rgba(230, 120, 95, 0.5) inset,
+    0 2px 6px rgba(110, 30, 15, 0.3),
+    0 0 0 1px rgba(160, 55, 35, 0.24);
+}
+
+.aero-button--icon {
+  min-height: 26px;
+  width: 28px;
+  padding: 0;
+  border-radius: var(--r-sm);
+  color: var(--aero-deep-800);
+}
+
+.aero-button--ghost {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(150, 200, 235, 0.12)
+  );
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 1px 3px rgba(9, 55, 92, 0.14);
+  font-weight: 500;
+}
+
+.aero-button--ghost:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(220, 242, 255, 0.6) 52%,
+    rgba(180, 220, 245, 0.6)
+  );
+}
+
+.aero-button--sm {
+  min-height: 23px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  border-radius: var(--r-sm);
+}
+
+/* ==========================================================================
+   Inputs — sunk glass wells
+   ========================================================================== */
+
+.aero-field {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  color: var(--text-on-glass);
+  background: linear-gradient(
+    180deg,
+    rgba(206, 232, 248, 0.55) 0%,
+    rgba(255, 255, 255, 0.92) 55%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 2px 5px rgba(9, 55, 92, 0.22) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: box-shadow 0.16s var(--ease-out), background 0.16s var(--ease-out);
+}
+
+.aero-field::placeholder {
+  color: rgba(95, 137, 168, 0.75);
+}
+
+.aero-field:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(214, 238, 252, 0.5) 0%,
+    rgba(255, 255, 255, 0.96) 55%,
+    #ffffff 100%
+  );
+}
+
+.aero-field:focus {
+  background: linear-gradient(180deg, rgba(224, 244, 255, 0.5) 0%, #ffffff 60%);
+  box-shadow:
+    0 2px 5px rgba(9, 55, 92, 0.16) inset,
+    0 0 0 2px rgba(92, 194, 247, 0.55),
+    0 0 12px rgba(92, 194, 247, 0.45);
+}
+
+.aero-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.aero-field--mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+textarea.aero-field {
+  resize: none;
+  line-height: 1.55;
+}
+
+/* Sunken well used for code / response bodies */
+.aero-well {
+  position: relative;
+  border-radius: var(--r-md);
+  background: linear-gradient(
+    180deg,
+    rgba(196, 226, 245, 0.42) 0%,
+    rgba(255, 255, 255, 0.96) 12%,
+    #ffffff 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 2px 6px rgba(9, 55, 92, 0.2) inset,
+    0 0 0 1px rgba(14, 90, 145, 0.08);
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Selects
+   ========================================================================== */
+
+.aero-select {
+  position: relative;
+  display: inline-block;
+}
+
+.aero-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 28px 4px 10px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-strong);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, #ffffff 0%, #e8f6ff 48%, #c3e5f9 52%, #b0dbf2 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -6px 10px rgba(150, 205, 240, 0.45) inset,
+    0 2px 5px rgba(9, 55, 92, 0.24);
+  cursor: pointer;
+  transition: filter 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+}
+
+.aero-select select:hover {
+  filter: brightness(1.04);
+}
+
+.aero-select select:focus {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -6px 12px rgba(150, 205, 240, 0.5) inset,
+    0 0 0 2px rgba(92, 194, 247, 0.6),
+    0 2px 8px rgba(9, 55, 92, 0.28);
+}
+
+.aero-select select option {
+  background: #f4fbff;
+  color: var(--text-strong);
+  font-weight: 500;
+  padding: 4px;
+}
+
+.aero-select__chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--aero-deep-800);
+  opacity: 0.75;
+}
+
+/* ==========================================================================
+   Tabs
+   ========================================================================== */
+
+.aero-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 6px 8px 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55),
+    rgba(206, 236, 252, 0.28)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 10px rgba(10, 60, 100, 0.1) inset;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.aero-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.aero-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px 7px;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--aero-deep-800);
+  white-space: nowrap;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(210, 236, 250, 0.35)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
+  opacity: 0.8;
+  transition: opacity 0.15s var(--ease-out), background 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
+}
+
+.aero-tab:hover {
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(205, 236, 253, 0.6));
+}
+
+.aero-tab--active {
+  opacity: 1;
+  color: var(--text-strong);
+  background: linear-gradient(180deg, #ffffff 0%, #f2fbff 45%, #dff2fd 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -6px 12px rgba(150, 205, 240, 0.35) inset,
+    0 -3px 10px rgba(10, 60, 100, 0.14);
+  z-index: 2;
+}
+
+.aero-tab__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 17px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(180deg, #7ec9f5, #2b8fce);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 1px 3px rgba(10, 60, 100, 0.4);
+  text-shadow: 0 1px 1px rgba(0, 40, 70, 0.5);
+}
+
+.aero-tab__count--info {
+  background: linear-gradient(180deg, #a7e07a, #56a524);
+}
+
+/* ==========================================================================
+   Badges & pills
+   ========================================================================== */
+
+.aero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 30, 55, 0.55);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -4px 8px rgba(0, 0, 0, 0.14) inset,
+    0 2px 5px rgba(9, 55, 92, 0.32);
+}
+
+.aero-badge--success {
+  background: linear-gradient(180deg, #b6eb8b 0%, #6cc32f 52%, #4b9c1a 100%);
+}
+
+.aero-badge--info {
+  background: linear-gradient(180deg, #a5dcfa 0%, #3fa3de 52%, #1c7cba 100%);
+}
+
+.aero-badge--warning {
+  background: linear-gradient(180deg, #ffe08a 0%, #f5b91f 52%, #cf9208 100%);
+  color: #4a3300;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.aero-badge--danger {
+  background: linear-gradient(180deg, #ffb3a5 0%, #ef6a51 52%, #c93f26 100%);
+}
+
+.aero-badge--neutral {
+  background: linear-gradient(180deg, #e9f4fb 0%, #b9d6e8 52%, #91b6cf 100%);
+  color: var(--aero-deep-800);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.aero-badge--violet {
+  background: linear-gradient(180deg, #d3bdf7 0%, #9b6fe3 52%, #7145c4 100%);
+}
+
+/* ==========================================================================
+   Method pills
+   ========================================================================== */
+
+.aero-method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 3px 9px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 30, 55, 0.55);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -4px 8px rgba(0, 0, 0, 0.16) inset,
+    0 2px 5px rgba(9, 55, 92, 0.3);
+}
+
+.aero-method--get {
+  background: linear-gradient(180deg, #b6eb8b 0%, #6cc32f 52%, #4b9c1a 100%);
+}
+.aero-method--post {
+  background: linear-gradient(180deg, #ffe08a 0%, #f5b91f 52%, #cf9208 100%);
+  color: #4a3300;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.aero-method--put {
+  background: linear-gradient(180deg, #a5dcfa 0%, #3fa3de 52%, #1c7cba 100%);
+}
+.aero-method--patch {
+  background: linear-gradient(180deg, #d3bdf7 0%, #9b6fe3 52%, #7145c4 100%);
+}
+.aero-method--delete {
+  background: linear-gradient(180deg, #ffb3a5 0%, #ef6a51 52%, #c93f26 100%);
+}
+.aero-method--head,
+.aero-method--options {
+  background: linear-gradient(180deg, #a9e6e0 0%, #46c1b6 52%, #1f8c83 100%);
+}
+.aero-method--neutral {
+  background: linear-gradient(180deg, #e9f4fb 0%, #b9d6e8 52%, #91b6cf 100%);
+  color: var(--aero-deep-800);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ==========================================================================
+   Toggle / checkbox
+   ========================================================================== */
+
+.aero-check {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(200, 228, 246, 0.7), #ffffff 60%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 2px 4px rgba(9, 55, 92, 0.24) inset,
+    0 1px 0 rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: background 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+}
+
+.aero-check:hover {
+  box-shadow:
+    0 2px 5px rgba(9, 55, 92, 0.2) inset,
+    0 0 0 2px rgba(92, 194, 247, 0.35);
+}
+
+.aero-check--on {
+  background: linear-gradient(180deg, #b6eb8b 0%, #6cc32f 55%, #4b9c1a 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 2px 5px rgba(30, 80, 20, 0.35);
+}
+
+.aero-check__tick {
+  color: #ffffff;
+  filter: drop-shadow(0 1px 1px rgba(20, 60, 10, 0.6));
+}
+
+/* ==========================================================================
+   Tree (collections)
+   ========================================================================== */
+
+.aero-tree {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px 6px 16px;
+}
+
+.aero-tree__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 7px 2px 4px;
+  border-radius: var(--r-sm);
+  color: var(--text-on-glass);
+  cursor: pointer;
+  transition: background 0.13s var(--ease-out), box-shadow 0.13s var(--ease-out);
+}
+
+.aero-tree__row:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(210, 238, 253, 0.62)
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 1px 4px rgba(9, 55, 92, 0.14);
+}
+
+.aero-tree__row--active {
+  background: linear-gradient(180deg, #ffffff 0%, #dff2fd 50%, #bfe4f8 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px rgba(43, 161, 227, 0.5),
+    0 2px 7px rgba(9, 55, 92, 0.24);
+}
+
+.aero-tree__row--drop {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 0 0 2px rgba(111, 191, 53, 0.75),
+    0 0 12px rgba(111, 191, 53, 0.5);
+}
+
+.aero-tree__twisty {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--aero-deep-800);
+  opacity: 0.72;
+  transition: transform 0.16s var(--ease-out), opacity 0.16s var(--ease-out);
+}
+
+.aero-tree__twisty:hover {
+  opacity: 1;
+}
+
+.aero-tree__twisty--open {
+  transform: rotate(90deg);
+}
+
+.aero-tree__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  opacity: 0.9;
+}
+
+.aero-tree__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+
+.aero-tree__children {
+  position: relative;
+  margin-left: 11px;
+  padding-left: 7px;
+}
+
+/* The little guide line down the tree */
+.aero-tree__children::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 2px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(150, 200, 235, 0.5),
+    rgba(255, 255, 255, 0.5)
+  );
+}
+
+.aero-tree__actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  opacity: 0;
+  transition: opacity 0.15s var(--ease-out);
+}
+
+.aero-tree__row:hover .aero-tree__actions,
+.aero-tree__row--active .aero-tree__actions {
+  opacity: 1;
+}
+
+.aero-inline-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  background: #ffffff;
+  border: 1px solid rgba(43, 161, 227, 0.75);
+  box-shadow: 0 0 0 2px rgba(92, 194, 247, 0.35);
+}
+
+/* ==========================================================================
+   Key/value table
+   ========================================================================== */
+
+.aero-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+}
+
+.aero-kv__head {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--aero-deep-800);
+  opacity: 0.72;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.aero-kv__row {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border-radius: var(--r-sm);
+  transition: background 0.13s var(--ease-out);
+}
+
+.aero-kv__row:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(214, 238, 252, 0.45)
+  );
+}
+
+.aero-kv__row--off .aero-kv__input {
+  opacity: 0.5;
+  text-decoration: line-through;
+  text-decoration-color: rgba(120, 160, 190, 0.7);
+}
+
+.aero-kv__input {
+  min-height: 25px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-on-glass);
+  background: linear-gradient(180deg, rgba(208, 232, 247, 0.5), #ffffff 60%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 4px rgba(9, 55, 92, 0.2) inset;
+  width: 100%;
+  min-width: 0;
+  transition: box-shadow 0.15s var(--ease-out), background 0.15s var(--ease-out);
+}
+
+.aero-kv__input::placeholder {
+  color: rgba(95, 137, 168, 0.6);
+  font-family: var(--font-ui);
+}
+
+.aero-kv__input:hover {
+  background: linear-gradient(180deg, rgba(214, 238, 252, 0.4), #ffffff 60%);
+}
+
+.aero-kv__input:focus {
+  background: #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(92, 194, 247, 0.5),
+    0 0 10px rgba(92, 194, 247, 0.35);
+}
+
+.aero-kv__delete {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--aero-coral-600);
+  opacity: 0;
+  transition: opacity 0.15s var(--ease-out), background 0.15s var(--ease-out);
+}
+
+.aero-kv__row:hover .aero-kv__delete {
+  opacity: 0.85;
+}
+
+.aero-kv__delete:hover {
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(255, 220, 214, 0.95), rgba(255, 175, 160, 0.85));
+}
+
+/* ==========================================================================
+   Scrollbars — glossy Aero
+   ========================================================================== */
+
+.aero-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 185, 225, 0.75) transparent;
+}
+
+.aero-scroll::-webkit-scrollbar {
+  width: 13px;
+  height: 13px;
+}
+
+.aero-scroll::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, rgba(190, 224, 244, 0.25), rgba(255, 255, 255, 0.5));
+  border-radius: var(--r-pill);
+}
+
+.aero-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--r-pill);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #d6eefc 45%, #a9d7ef 52%, #8cc4e4 100%)
+    padding-box;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 0 8px rgba(60, 140, 190, 0.35);
+}
+
+.aero-scroll::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ddf2ff 45%, #b6dff5 52%, #96cdea 100%)
+    padding-box;
+}
+
+.aero-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ==========================================================================
+   Panels & glass cards
+   ========================================================================== */
+
+.aero-panel {
+  position: relative;
+  border-radius: var(--r-lg);
+  background: var(--glass-panel);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-panel);
+}
+
+.aero-panel--flat {
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-panel-soft);
+}
+
+.aero-panel--strong {
+  background: var(--glass-panel-strong);
+}
+
+.aero-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+
+.aero-panel__body {
+  padding: 12px;
+}
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+
+.aero-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(
+      120% 100% at 50% 0%,
+      rgba(10, 70, 110, 0.42),
+      rgba(4, 26, 45, 0.6)
+    );
+  backdrop-filter: blur(5px) saturate(1.2);
+  -webkit-backdrop-filter: blur(5px) saturate(1.2);
+  animation: aero-fade-up 0.18s var(--ease-out);
+}
+
+.aero-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-xl);
+  background: var(--glass-panel-strong);
+  backdrop-filter: blur(26px) saturate(1.6);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-float);
+  animation: aero-pop 0.22s var(--ease-spring);
+  overflow: hidden;
+}
+
+.aero-modal--wide {
+  max-width: 820px;
+}
+
+.aero-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 16px;
+  flex: 0 0 auto;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(205, 236, 253, 0.7)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -8px 16px rgba(140, 200, 240, 0.28) inset;
+}
+
+.aero-modal__title {
+  flex: 1 1 auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-strong);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.aero-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+}
+
+.aero-modal__footer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 16px;
+  flex: 0 0 auto;
+  background: linear-gradient(180deg, rgba(238, 249, 255, 0.6), rgba(206, 236, 253, 0.7));
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.aero-modal__footer-spacer {
+  flex: 1 1 auto;
+}
+
+/* ==========================================================================
+   Dropdown menu
+   ========================================================================== */
+
+.aero-menu {
+  position: fixed;
+  z-index: 300;
+  min-width: 196px;
+  padding: 5px;
+  border-radius: var(--r-md);
+  background: var(--glass-panel-strong);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-float);
+  animation: aero-pop 0.13s var(--ease-out);
+}
+
+.aero-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 9px;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  color: var(--text-strong);
+  text-align: left;
+  transition: background 0.12s var(--ease-out);
+}
+
+.aero-menu__item:hover {
+  background: linear-gradient(180deg, #ffffff, #d3edfc);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+.aero-menu__item--danger {
+  color: var(--aero-coral-600);
+}
+
+.aero-menu__item--danger:hover {
+  background: linear-gradient(180deg, #fff0ed, #ffd0c7);
+}
+
+.aero-menu__separator {
+  height: 1px;
+  margin: 4px 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(140, 195, 230, 0.55),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+/* ==========================================================================
+   Misc utilities
+   ========================================================================== */
+
+.aero-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aero-mono {
+  font-family: var(--font-mono);
+}
+
+.aero-dim {
+  opacity: 0.65;
+}
+
+.aero-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  padding: 32px;
+  text-align: center;
+  color: var(--aero-deep-800);
+  opacity: 0.62;
+}
+
+.aero-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.55);
+  border-top-color: #ffffff;
+  border-right-color: rgba(43, 161, 227, 0.9);
+  animation: aero-spin 0.75s linear infinite;
+  box-shadow: 0 2px 8px rgba(10, 60, 100, 0.3);
+}
+
+.aero-tooltip {
+  position: relative;
+}
+
+.aero-tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  z-index: 400;
+  padding: 4px 9px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+  background: var(--glass-panel-strong);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-panel-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s var(--ease-out), transform 0.14s var(--ease-out);
+}
+
+.aero-tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.aero-resize-handle {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.aero-resize-handle--v {
+  height: 7px;
+  cursor: row-resize;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(190, 224, 244, 0.35)
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.aero-resize-handle--v::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.95) 0 5px,
+    rgba(150, 200, 235, 0.6) 5px 10px
+  );
+  opacity: 0.7;
+}
+
+.aero-resize-handle--v:hover::after {
+  opacity: 1;
+  background: repeating-linear-gradient(
+    90deg,
+    #ffffff 0 5px,
+    rgba(43, 161, 227, 0.8) 5px 10px
+  );
+}
+
+/* Reduced motion: keep it calm for users who ask for it. */
+@media (prefers-reduced-motion: reduce) {
+  .aero-shell::before,
+  .aero-shell::after,
+  .aero-bubble,
+  .aero-spinner {
+    animation: none !important;
+  }
+}

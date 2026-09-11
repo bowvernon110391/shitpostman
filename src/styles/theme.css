@@ -1,0 +1,238 @@
+/* ==========================================================================
+   Frutiger Aero — Design Tokens
+   Palette: white / sky-blue / deep-blue / grass-green, with glass + gloss.
+   ========================================================================== */
+
+:root {
+  /* ---------- Sky / water blues ---------- */
+  --aero-sky-050: #f2fbff;
+  --aero-sky-100: #e2f6ff;
+  --aero-sky-200: #c2ebff;
+  --aero-sky-300: #93daff;
+  --aero-sky-400: #5cc2f7;
+  --aero-blue-500: #2ba1e3;
+  --aero-blue-600: #1480c4;
+  --aero-blue-700: #0e5f97;
+  --aero-deep-800: #0a4571;
+  --aero-deep-900: #072d4d;
+
+  /* ---------- Grass greens ---------- */
+  --aero-lime-200: #e4f7c8;
+  --aero-green-300: #bce996;
+  --aero-green-400: #96d861;
+  --aero-green-500: #6fbf35;
+  --aero-green-600: #4f9a20;
+
+  /* ---------- Neutrals ---------- */
+  --aero-white: #ffffff;
+  --aero-cloud: #f4fbff;
+  --aero-mist: #dceaf5;
+
+  /* ---------- Status accents ---------- */
+  --aero-gold-400: #f7c948;
+  --aero-gold-600: #d69b0c;
+  --aero-coral-400: #ff8a7a;
+  --aero-coral-600: #d94a36;
+  --aero-violet-400: #b596f0;
+  --aero-violet-600: #7d4fd1;
+  --aero-teal-400: #63d9d0;
+  --aero-teal-600: #1f9c93;
+
+  /* ---------- Typography ---------- */
+  --font-ui: 'Segoe UI Variable Text', 'Segoe UI', Frutiger, 'Frutiger Next',
+    'Helvetica Neue', Arial, system-ui, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'SFMono-Regular', 'Liberation Mono',
+    Menlo, monospace;
+
+  --text-strong: #0b3555;
+  --text-body: #14496e;
+  --text-muted: #5f89a8;
+  --text-on-glass: #0a3a5c;
+
+  /* ---------- Glass surfaces ---------- */
+  --glass-panel: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(233, 247, 255, 0.66) 45%,
+    rgba(198, 232, 250, 0.6) 100%
+  );
+  --glass-panel-strong: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(240, 250, 255, 0.86) 55%,
+    rgba(214, 240, 253, 0.82) 100%
+  );
+  --glass-chrome: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(206, 238, 255, 0.7) 50%,
+    rgba(150, 208, 242, 0.62) 100%
+  );
+  --glass-sunk: linear-gradient(
+    180deg,
+    rgba(120, 180, 215, 0.28) 0%,
+    rgba(255, 255, 255, 0.7) 100%
+  );
+  --glass-tint-blue: linear-gradient(
+    180deg,
+    rgba(206, 240, 255, 0.75),
+    rgba(140, 208, 245, 0.55)
+  );
+  --glass-tint-green: linear-gradient(
+    180deg,
+    rgba(226, 248, 200, 0.8),
+    rgba(160, 219, 110, 0.55)
+  );
+
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-border-soft: rgba(255, 255, 255, 0.55);
+  --glass-edge: rgba(12, 70, 110, 0.18);
+  --glass-blur: 20px;
+
+  /* ---------- Gloss overlay (top-half sheen) ---------- */
+  --gloss: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.45) 46%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  --gloss-soft: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(0, 0, 0, 0.04) 100%
+  );
+
+  /* ---------- Elevation ---------- */
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -18px 30px rgba(70, 140, 190, 0.12) inset, 0 12px 26px rgba(6, 50, 84, 0.24),
+    0 2px 6px rgba(6, 50, 84, 0.16);
+  --shadow-panel-soft: 0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 8px 20px rgba(6, 50, 84, 0.18);
+  --shadow-float: 0 22px 48px rgba(4, 34, 60, 0.42),
+    0 6px 14px rgba(4, 34, 60, 0.26);
+  --shadow-inset-sunk: 0 2px 5px rgba(9, 52, 86, 0.28) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.7) inset;
+
+  /* ---------- Geometry ---------- */
+  --r-sm: 6px;
+  --r-md: 9px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  --titlebar-h: 38px;
+  --statusbar-h: 26px;
+  --sidebar-w: 300px;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================================================
+   Motion primitives
+   ========================================================================== */
+
+@keyframes aero-bubble-rise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.9);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--bubble-opacity, 0.5);
+  }
+  50% {
+    transform: translate3d(var(--bubble-drift, 20px), -50vh, 0) scale(1.05);
+  }
+  90% {
+    opacity: var(--bubble-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(0, -104vh, 0) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes aero-aurora {
+  0% {
+    transform: translate3d(-6%, 0, 0) rotate(-2deg) scale(1.1);
+  }
+  50% {
+    transform: translate3d(6%, -3%, 0) rotate(2deg) scale(1.2);
+  }
+  100% {
+    transform: translate3d(-6%, 0, 0) rotate(-2deg) scale(1.1);
+  }
+}
+
+@keyframes aero-caustics {
+  0% {
+    background-position: 0% 0%, 100% 100%, 50% 0%;
+  }
+  50% {
+    background-position: 60% 40%, 40% 60%, 20% 80%;
+  }
+  100% {
+    background-position: 0% 0%, 100% 100%, 50% 0%;
+  }
+}
+
+@keyframes aero-sheen {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
+
+@keyframes aero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aero-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes aero-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aero-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes aero-ripple {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}

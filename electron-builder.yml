@@ -1,0 +1,43 @@
+appId: com.bowie.shitpostman
+productName: Shitpostman
+copyright: Copyright © 2026 Bowie
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**/*
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-setup.${ext}
+  # Building an unsigned installer locally. electron-builder's `winCodeSign`
+  # helper archive contains macOS symlinks that 7-Zip cannot create on Windows
+  # without Developer Mode / admin rights, which aborts packaging. Nothing is
+  # lost here because no certificate and no custom icon are configured.
+  # Enable Developer Mode (or run elevated) and flip this back to true if you
+  # later add an icon in `build/` or a code-signing certificate.
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Shitpostman
+
+mac:
+  target:
+    - dmg
+  category: public.app-category.developer-tools
+
+linux:
+  target:
+    - AppImage
+  category: Development
