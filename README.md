@@ -99,10 +99,18 @@ run compiles and packages everything but skips publishing, so it is safe as a dr
 `winCodeSign` helper ships macOS symlinks that 7-Zip cannot create on Windows without
 Developer Mode or admin rights, which aborts packaging.
 
-The CI workflow re-enables it for its Windows job (`-c.win.signAndEditExecutable=true`),
-because GitHub's Windows runners *can* create those symlinks. That step is what embeds
-`build/icon.png` into the `.exe`, and what would let a certificate sign it. To match CI
-locally, turn on Developer Mode and flip the option to `true`.
+The CI workflow re-enables it for its Windows job via `electron-builder.ci.yml`, a small
+overlay that `extends` this file, because GitHub's Windows runners *can* create those
+symlinks. That step is what embeds `build/icon.png` into the `.exe`, and what would let a
+certificate sign it. To match CI locally, turn on Developer Mode and flip the option to
+`true` in `electron-builder.yml`.
+
+The overlay exists rather than passing `-c.win.signAndEditExecutable=true` on the command
+line because PowerShell — the default shell on GitHub's Windows runners — splits that
+dotted token in two at the `=`, after which electron-builder tries to open the second half
+as a config file and fails with `ENOENT: ... '.win.signAndEditExecutable=true'`. A plain
+filename like `--config electron-builder.ci.yml` has nothing to mangle. Note the overlay is
+not auto-detected, so local builds keep using `electron-builder.yml` untouched.
 
 ## Signing (later)
 
