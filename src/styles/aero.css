@@ -313,6 +313,15 @@ pre {
     4px 0 18px rgba(8, 48, 80, 0.18);
 }
 
+/*
+ * `visibility`/`width: 0` would still leave the rail's borders and shadow in
+ * the layout, so the collapsed state removes it from the flow entirely. The
+ * component stays mounted, which is what preserves its internal state.
+ */
+.aero-sidebar--collapsed {
+  display: none;
+}
+
 .aero-main {
   position: relative;
   display: flex;
@@ -1612,6 +1621,17 @@ textarea.aero-field {
 .aero-resize-handle {
   position: relative;
   flex: 0 0 auto;
+  /*
+   * Above the panes so their shadows cannot paint over the grip. The band is
+   * deliberately thin; the dashed pill below is the entire affordance.
+   */
+  z-index: 6;
+}
+
+/* Sits inside the band, so the ring does not spill onto the neighbouring pane. */
+.aero-resize-handle:focus-visible {
+  outline: 2px solid rgba(43, 161, 227, 0.85);
+  outline-offset: -1px;
 }
 
 .aero-resize-handle--v {
@@ -1626,30 +1646,137 @@ textarea.aero-field {
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);
 }
 
-.aero-resize-handle--v::after {
+.aero-resize-handle--h {
+  width: 7px;
+  cursor: col-resize;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(190, 224, 244, 0.35)
+  );
+  border-left: 1px solid rgba(255, 255, 255, 0.7);
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* The grip: a dashed pill centred in the band, running along it. */
+.aero-resize-handle::after {
   content: '';
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  border-radius: var(--r-pill);
+  opacity: 0.75;
+  /* Only opacity transitions -- gradients do not interpolate. */
+  transition: opacity 0.14s var(--ease-out);
+}
+
+.aero-resize-handle--v::after {
   width: 46px;
   height: 3px;
-  border-radius: var(--r-pill);
   background: repeating-linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.95) 0 5px,
     rgba(150, 200, 235, 0.6) 5px 10px
   );
-  opacity: 0.7;
 }
 
-.aero-resize-handle--v:hover::after {
+.aero-resize-handle--h::after {
+  width: 3px;
+  height: 46px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0 5px,
+    rgba(150, 200, 235, 0.6) 5px 10px
+  );
+}
+
+.aero-resize-handle:hover::after,
+.aero-resize-handle--dragging::after {
   opacity: 1;
+}
+
+.aero-resize-handle--v:hover::after,
+.aero-resize-handle--v.aero-resize-handle--dragging::after {
   background: repeating-linear-gradient(
     90deg,
     #ffffff 0 5px,
     rgba(43, 161, 227, 0.8) 5px 10px
   );
+}
+
+.aero-resize-handle--h:hover::after,
+.aero-resize-handle--h.aero-resize-handle--dragging::after {
+  background: repeating-linear-gradient(
+    180deg,
+    #ffffff 0 5px,
+    rgba(43, 161, 227, 0.8) 5px 10px
+  );
+}
+
+/*
+ * Corner grip -- a diagonal hatch pinned to a box's bottom-right, the affordance
+ * a native `resize: vertical` textarea shows. The band variants separate two
+ * panes; this one grows a single box in place, so the caller positions it inside
+ * an already-relative ancestor and no `--h`/`--v` class is applied (see the
+ * className comment in SplitHandle.tsx).
+ */
+.aero-resize-handle--corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  /* Keep in step with `CORNER_GRIP_SIZE` in src/lib/layout.ts. */
+  width: 18px;
+  height: 18px;
+  /* Vertical only, so no diagonal cursor promising a corner drag. */
+  cursor: ns-resize;
+  /* Only has to clear the text underneath, not a neighbouring pane. */
+  z-index: 3;
+  /*
+   * No radius of its own: the well's curve clips the tip of the grip, the same
+   * way it clips a native resize corner. Rounding the box here as well would
+   * cut the strokes twice and leave a notch.
+   */
+  border-radius: 0;
+}
+
+.aero-resize-handle--corner::after {
+  left: auto;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  /* Undoes the band's centring translate, which would shift it off corner. */
+  transform: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  opacity: 0.5;
+  /*
+   * Diagonal strokes, blue rather than the bands' white/blue: the well's
+   * gradient ends solid white, so a white hatch would vanish exactly where the
+   * grip sits. The transparent gaps let that background through.
+   */
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(96, 156, 200, 0.95) 0 1.5px,
+    transparent 1.5px 3px
+  );
+  /*
+   * The clip is the whole trick. Without it this is a square of hatch floating
+   * near the corner -- a tile, which is how it read. Clipped to the lower-right
+   * half it becomes strokes in a corner: the hatch runs parallel to the
+   * hypotenuse, so each stroke is shorter than the last and the longest lies
+   * against the diagonal, which is the classic resize gripper.
+   *
+   * Only the paint is clipped, not the element -- `clip-path` would shrink the
+   * hit area to the triangle, and the full 18px square is the easier target.
+   */
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.aero-resize-handle--corner:hover::after,
+.aero-resize-handle--corner.aero-resize-handle--dragging::after {
+  opacity: 0.85;
 }
 
 /* Reduced motion: keep it calm for users who ask for it. */

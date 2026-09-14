@@ -9,6 +9,8 @@ import {
   Eye,
   FileCode2,
   Loader2,
+  Maximize2,
+  Minimize2,
   Trash2
 } from 'lucide-react'
 import { useAppStore } from '../../store/useAppStore'
@@ -68,6 +70,8 @@ export function ResponsePanel(): JSX.Element {
   const setResponseTab = useAppStore((state) => state.setResponseTab)
   const clearResponse = useAppStore((state) => state.clearResponse)
   const notify = useAppStore((state) => state.notify)
+  const responseMaximized = useAppStore((state) => state.settings.responseMaximized)
+  const updateSettings = useAppStore((state) => state.updateSettings)
 
   const [bodyView, setBodyView] = useState<BodyView>('pretty')
 
@@ -185,6 +189,14 @@ export function ResponsePanel(): JSX.Element {
 
         <span className="app-toolbar__spacer" />
 
+        <button
+          type="button"
+          className="aero-button aero-button--icon aero-button--ghost"
+          onClick={() => updateSettings({ responseMaximized: !responseMaximized })}
+          title={responseMaximized ? 'Restore the editor' : 'Maximize the response'}
+        >
+          {responseMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+        </button>
         <button
           type="button"
           className="aero-button aero-button--sm"

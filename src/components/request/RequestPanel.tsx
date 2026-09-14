@@ -1,7 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { Code2, FileText, KeyRound, ListFilter, Lock } from 'lucide-react'
-import { isEnabled } from '@shared/types'
+import { DEFAULT_SETTINGS, isEnabled } from '@shared/types'
 import { useAppStore, type RequestTab } from '../../store/useAppStore'
+import { HANDLE_SIZE, RESIZE_STEP, clamp, paneLimits, ratioLimits } from '../../lib/layout'
+import { useElementSize } from '../../lib/useElementSize'
+import { SplitHandle } from '../ui/SplitHandle'
 import { UrlBar } from './UrlBar'
 import { ParamsPanel } from './ParamsPanel'
 import { HeadersPanel } from './HeadersPanel'
@@ -28,6 +31,11 @@ export function RequestPanel(): JSX.Element {
   const send = useAppStore((state) => state.send)
   const draftOriginId = useAppStore((state) => state.draftOriginId)
   const updateSavedRequest = useAppStore((state) => state.updateSavedRequest)
+  const settings = useAppStore((state) => state.settings)
+  const updateSettings = useAppStore((state) => state.updateSettings)
+
+  const workareaRef = useRef<HTMLDivElement>(null)
+  const workareaSize = useElementSize(workareaRef)
 
   // Ctrl/Cmd+Enter sends from anywhere in the request area.
   useEffect(() => {
@@ -47,6 +55,65 @@ export function RequestPanel(): JSX.Element {
     body: draft.body.type === 'none' ? 0 : 1,
     auth: draft.auth.type === 'none' ? 0 : 1,
     code: null
+  }
+
+  /*
+   * The panes are sized by an inline percentage `flex-basis`, so flipping the
+   * orientation only changes which axis that percentage resolves against and
+   * CSS does the rest. Only the px floors need the measured extent, which is
+   * what `useElementSize` provides.
+   */
+  const { paneLayout, responseMaximized } = settings
+  const axis = paneLayout === 'sideBySide' ? 'x' : 'y'
+  const extent = axis === 'x' ? workareaSize.width : workareaSize.height
+  const limits = paneLimits(paneLayout)
+  const bounds = ratioLimits(extent, limits.leading, limits.trailing)
+  const ratio = clamp(
+    axis === 'x' ? settings.editorRatioX : settings.editorRatioY,
+    bounds.min,
+    bounds.max
+  )
+
+  const editorStyle: CSSProperties = {
+    flexBasis: `${ratio * 100}%`,
+    flexGrow: 0,
+    flexShrink: 0
+  }
+
+  /*
+   * Clamping happens on read rather than being written back to the store: a
+   * window resize can push the stored ratio out of bounds, and writing during
+   * render would loop.
+   *
+   * px and ratio convert through `extent`, never through the space left over
+   * after the handle. `flex-basis` percentages resolve against the whole
+   * container, so dividing by the net figure inflates every value by
+   * `extent / (extent - HANDLE_SIZE)` and the split drifts away from the
+   * cursor.
+   */
+  const splitValue = ratio * extent
+  // `extent - handle - trailing` can fall below the leading floor in a very
+  // small window; preferring the floor keeps the range from inverting.
+  const splitMax = Math.max(limits.leading, extent - HANDLE_SIZE - limits.trailing)
+
+  const fromPointer = (clientPos: number): number => {
+    const rect = workareaRef.current?.getBoundingClientRect()
+    if (!rect) return splitValue
+    return clientPos - (axis === 'x' ? rect.left : rect.top)
+  }
+
+  const changeSplit = (next: number): void => {
+    if (extent <= 0) return
+    const nextRatio = next / extent
+    updateSettings(axis === 'x' ? { editorRatioX: nextRatio } : { editorRatioY: nextRatio })
+  }
+
+  const resetSplit = (): void => {
+    updateSettings(
+      axis === 'x'
+        ? { editorRatioX: DEFAULT_SETTINGS.editorRatioX }
+        : { editorRatioY: DEFAULT_SETTINGS.editorRatioY }
+    )
   }
 
   return (
@@ -72,8 +139,14 @@ export function RequestPanel(): JSX.Element {
 
       <UrlBar />
 
-      <div className="app-workarea">
-        <div className="app-pane app-pane--editor">
+      <div
+        ref={workareaRef}
+        className={`app-workarea${paneLayout === 'sideBySide' ? ' app-workarea--sideBySide' : ''}`}
+      >
+        <div
+          className="app-pane app-pane--editor"
+          style={responseMaximized ? { display: 'none' } : editorStyle}
+        >
           <div className="aero-tabs">
             {TABS.map((tab) => (
               <button
@@ -99,6 +172,20 @@ export function RequestPanel(): JSX.Element {
             {requestTab === 'code' ? <CodePanel /> : null}
           </div>
         </div>
+
+        {responseMaximized ? null : (
+          <SplitHandle
+            axis={axis}
+            value={splitValue}
+            min={limits.leading}
+            max={splitMax}
+            step={RESIZE_STEP}
+            label={axis === 'x' ? 'Editor width' : 'Editor height'}
+            fromPointer={fromPointer}
+            onChange={changeSplit}
+            onReset={resetSplit}
+          />
+        )}
 
         <div className="app-pane app-pane--response">
           <ResponsePanel />

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { FolderOpen, Info, RotateCcw, Save, Upload } from 'lucide-react'
+import { Columns2, FolderOpen, Info, RotateCcw, Rows2, Save, Upload } from 'lucide-react'
+import { DEFAULT_SETTINGS } from '@shared/types'
 import { useAppStore } from '../../store/useAppStore'
 import { useUiStore } from '../../store/useUiStore'
 import { Modal } from '../ui/Modal'
@@ -23,6 +24,20 @@ export function SettingsModal(): JSX.Element {
     const path = await window.aero.getStorePath()
     setStorePath(path)
     await window.aero.revealStoreFile()
+  }
+
+  /** Puts every pane back to its shipping size. */
+  const resetLayout = (): void => {
+    updateSettings({
+      sidebarWidth: DEFAULT_SETTINGS.sidebarWidth,
+      sidebarCollapsed: DEFAULT_SETTINGS.sidebarCollapsed,
+      paneLayout: DEFAULT_SETTINGS.paneLayout,
+      editorRatioY: DEFAULT_SETTINGS.editorRatioY,
+      editorRatioX: DEFAULT_SETTINGS.editorRatioX,
+      responseMaximized: DEFAULT_SETTINGS.responseMaximized,
+      bodyEditorHeight: DEFAULT_SETTINGS.bodyEditorHeight
+    })
+    notify('Panel sizes reset', 'success')
   }
 
   const importPasted = (): void => {
@@ -142,6 +157,58 @@ export function SettingsModal(): JSX.Element {
           />
           <span>Play a chime when a response arrives</span>
         </label>
+
+        <div className="aero-divider" />
+        <div className="aero-section__title">Layout</div>
+
+        <div className="app-field-row">
+          <span className="app-field-row__label">Editor &amp; response</span>
+          <div className="app-field-row__control">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                type="button"
+                className={`aero-button aero-button--sm${
+                  settings.paneLayout === 'stacked' ? ' aero-button--primary' : ''
+                }`}
+                onClick={() => updateSettings({ paneLayout: 'stacked' })}
+              >
+                <Rows2 size={12} />
+                Stacked
+              </button>
+              <button
+                type="button"
+                className={`aero-button aero-button--sm${
+                  settings.paneLayout === 'sideBySide' ? ' aero-button--primary' : ''
+                }`}
+                onClick={() => updateSettings({ paneLayout: 'sideBySide' })}
+              >
+                <Columns2 size={12} />
+                Side by side
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="app-field-row">
+          <span className="app-field-row__label">Panel sizes</span>
+          <div className="app-field-row__control">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button type="button" className="aero-button aero-button--sm" onClick={resetLayout}>
+                <RotateCcw size={12} />
+                Reset panel sizes
+              </button>
+              <span className="aero-hint">
+                Sidebar {settings.sidebarWidth}px · editor{' '}
+                {Math.round(
+                  (settings.paneLayout === 'sideBySide'
+                    ? settings.editorRatioX
+                    : settings.editorRatioY) * 100
+                )}
+                % of the work area · body {settings.bodyEditorHeight}px
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div className="aero-divider" />
         <div className="aero-section__title">Data</div>

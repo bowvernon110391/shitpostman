@@ -65,6 +65,20 @@
   min-height: 0;
 }
 
+/*
+ * Side by side. The panes' inline `flex-basis` is a percentage either way -- it
+ * simply resolves against width instead of height -- so only the direction and
+ * the width floors change here.
+ */
+.app-workarea--sideBySide {
+  flex-direction: row;
+  min-width: 0;
+}
+
+.app-workarea--sideBySide > .app-pane {
+  min-width: 0;
+}
+
 .app-pane {
   display: flex;
   flex-direction: column;
@@ -72,8 +86,8 @@
 }
 
 .app-pane--editor {
-  flex: 0 0 auto;
-  height: 46%;
+  /* Fallback for the first paint, before the persisted split is applied. */
+  flex: 0 0 46%;
 }
 
 .app-pane--response {
@@ -88,6 +102,16 @@
 
 .app-pane__body--pad {
   padding: 12px;
+}
+
+/*
+ * Status-bar cluster. The gap is tighter than the bar's own 14px so the three
+ * layout buttons read as one group rather than as three separate items.
+ */
+.app-layout-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 
 .app-inner-tabs {

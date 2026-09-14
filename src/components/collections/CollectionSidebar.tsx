@@ -15,8 +15,16 @@ const TABS: { id: SidebarTab; label: string; icon: JSX.Element }[] = [
   { id: 'history', label: 'History', icon: <Clock size={12} /> }
 ]
 
+interface CollectionSidebarProps {
+  /**
+   * Hidden but still mounted, so the collection filter and the tree's state
+   * survive a collapse.
+   */
+  collapsed?: boolean
+}
+
 /** Left rail: collections tree, environments, and request history. */
-export function CollectionSidebar(): JSX.Element {
+export function CollectionSidebar({ collapsed = false }: CollectionSidebarProps): JSX.Element {
   const sidebarTab = useAppStore((state) => state.sidebarTab)
   const setSidebarTab = useAppStore((state) => state.setSidebarTab)
   const collections = useAppStore((state) => state.collections)
@@ -61,7 +69,7 @@ export function CollectionSidebar(): JSX.Element {
   }
 
   return (
-    <aside className="aero-sidebar">
+    <aside className={`aero-sidebar${collapsed ? ' aero-sidebar--collapsed' : ''}`}>
       <div className="aero-tabs" ref={tabsRef}>
         {TABS.map((tab) => (
           <button

@@ -1,4 +1,18 @@
-import { Clock, Database, Globe, Info, Layers, Wifi, WifiOff } from 'lucide-react'
+import {
+  Clock,
+  Columns2,
+  Database,
+  Globe,
+  Info,
+  Layers,
+  Maximize2,
+  Minimize2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Rows2,
+  Wifi,
+  WifiOff
+} from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { useUiStore } from '../store/useUiStore'
 import { countRequests } from '../lib/tree'
@@ -13,6 +27,7 @@ export function StatusBar(): JSX.Element {
   const responseError = useAppStore((state) => state.responseError)
   const sending = useAppStore((state) => state.sending)
   const settings = useAppStore((state) => state.settings)
+  const updateSettings = useAppStore((state) => state.updateSettings)
   const openModal = useUiStore((state) => state.openModal)
 
   const active = environments.find((entry) => entry.id === activeEnvironmentId) ?? null
@@ -65,6 +80,47 @@ export function StatusBar(): JSX.Element {
       </span>
       <span className="aero-statusbar__item">
         <Clock size={11} /> timeout {settings.timeout / 1000}s
+      </span>
+
+      {/*
+        These live here as well as in the response toolbar so that maximizing
+        the response can never trap the user: that toolbar is absent while a
+        request is sending, on error, and before the first send.
+      */}
+      <span className="app-layout-controls">
+        <button
+          type="button"
+          className="aero-button aero-button--icon aero-button--ghost"
+          onClick={() => updateSettings({ sidebarCollapsed: !settings.sidebarCollapsed })}
+          title={`${settings.sidebarCollapsed ? 'Show' : 'Hide'} the sidebar (Ctrl+B)`}
+        >
+          {settings.sidebarCollapsed ? <PanelLeftOpen size={12} /> : <PanelLeftClose size={12} />}
+        </button>
+        <button
+          type="button"
+          className="aero-button aero-button--icon aero-button--ghost"
+          disabled={settings.responseMaximized}
+          onClick={() =>
+            updateSettings({
+              paneLayout: settings.paneLayout === 'sideBySide' ? 'stacked' : 'sideBySide'
+            })
+          }
+          title={
+            settings.paneLayout === 'sideBySide'
+              ? 'Stack the editor above the response'
+              : 'Place the editor beside the response'
+          }
+        >
+          {settings.paneLayout === 'sideBySide' ? <Rows2 size={12} /> : <Columns2 size={12} />}
+        </button>
+        <button
+          type="button"
+          className="aero-button aero-button--icon aero-button--ghost"
+          onClick={() => updateSettings({ responseMaximized: !settings.responseMaximized })}
+          title={settings.responseMaximized ? 'Restore the editor' : 'Maximize the response'}
+        >
+          {settings.responseMaximized ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+        </button>
       </span>
 
       <button

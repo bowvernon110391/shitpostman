@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
+import { DEFAULT_SETTINGS } from '@shared/types'
 import { AeroBackground } from './components/AeroBackground'
 import { TitleBar } from './components/TitleBar'
 import { Toasts } from './components/Toasts'
@@ -12,6 +13,8 @@ import { EnvironmentModal } from './components/modals/EnvironmentModal'
 import { AboutModal } from './components/modals/AboutModal'
 import { ConfirmDialog } from './components/modals/ConfirmDialog'
 import { ContextMenu } from './components/ui/ContextMenu'
+import { SplitHandle } from './components/ui/SplitHandle'
+import { RESIZE_STEP, SIDEBAR_MAX_W, SIDEBAR_MIN_W } from './lib/layout'
 import { useAppStore } from './store/useAppStore'
 import { useUiStore } from './store/useUiStore'
 
@@ -55,7 +58,10 @@ function Splash(): JSX.Element {
 export default function App(): JSX.Element {
   const hydrate = useAppStore((state) => state.hydrate)
   const hydrated = useAppStore((state) => state.hydrated)
+  const settings = useAppStore((state) => state.settings)
+  const updateSettings = useAppStore((state) => state.updateSettings)
   const started = useRef(false)
+  const bodyRef = useRef<HTMLDivElement>(null)
 
   // React StrictMode runs effects twice in dev — hydrate exactly once.
   useEffect(() => {
@@ -64,6 +70,20 @@ export default function App(): JSX.Element {
     void hydrate()
   }, [hydrate])
 
+  // Ctrl/Cmd+B toggles the rail. The current value is read off the store rather
+  // than closed over, so this listener never needs rebinding.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'b') return
+      event.preventDefault()
+      updateSettings({ sidebarCollapsed: !useAppStore.getState().settings.sidebarCollapsed })
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [updateSettings])
+
+  const collapsed = settings.sidebarCollapsed
+
   return (
     <div className="aero-shell">
       <AeroBackground />
@@ -71,8 +91,35 @@ export default function App(): JSX.Element {
       <TitleBar center={<EnvironmentSelector />} />
 
       {hydrated ? (
-        <div className="aero-body">
-          <CollectionSidebar />
+        <div
+          ref={bodyRef}
+          className="aero-body"
+          /*
+           * One custom property drives the rail — `.aero-sidebar` already sizes
+           * itself from `--sidebar-w`, so a drag only ever writes this.
+           */
+          style={{ '--sidebar-w': `${settings.sidebarWidth}px` } as CSSProperties}
+        >
+          <CollectionSidebar collapsed={collapsed} />
+
+          {collapsed ? null : (
+            <SplitHandle
+              axis="x"
+              value={settings.sidebarWidth}
+              min={SIDEBAR_MIN_W}
+              max={SIDEBAR_MAX_W}
+              step={RESIZE_STEP}
+              label="Sidebar width"
+              // The rail is flush with the body's left edge, so the pointer's
+              // offset from that edge is the width itself.
+              fromPointer={(clientX) =>
+                clientX - (bodyRef.current?.getBoundingClientRect().left ?? 0)
+              }
+              onChange={(next) => updateSettings({ sidebarWidth: Math.round(next) })}
+              onReset={() => updateSettings({ sidebarWidth: DEFAULT_SETTINGS.sidebarWidth })}
+            />
+          )}
+
           <main className="aero-main">
             <RequestPanel />
           </main>

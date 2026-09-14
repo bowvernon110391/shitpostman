@@ -178,6 +178,9 @@ export interface HistoryEntry {
 /* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
+/** How the editor and response panes share the work area. */
+export type PaneLayout = 'stacked' | 'sideBySide'
+
 export interface AppSettings {
   /** Request timeout in ms. 0 disables the timeout. */
   timeout: number
@@ -187,6 +190,25 @@ export interface AppSettings {
   maxHistory: number
   /** Play subtle Aero UI sounds. */
   sounds: boolean
+  /** Left rail width in px. Retained even while the rail is collapsed. */
+  sidebarWidth: number
+  sidebarCollapsed: boolean
+  paneLayout: PaneLayout
+  /**
+   * The editor's share of the work area, 0..1. Tracked per orientation so
+   * flipping the layout does not stomp on the other axis' captured position.
+   */
+  editorRatioY: number
+  editorRatioX: number
+  /** Response fills the whole work area and the editor is hidden. */
+  responseMaximized: boolean
+  /**
+   * Height of the request body's raw editor in px. It only applies to the modes
+   * that show one (JSON / Raw / GraphQL). The ceiling is measured from the space
+   * the tab actually has, so a stored value bigger than that is clamped on read
+   * rather than written back.
+   */
+  bodyEditorHeight: number
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -194,7 +216,16 @@ export const DEFAULT_SETTINGS: AppSettings = {
   followRedirects: true,
   sslVerification: true,
   maxHistory: 200,
-  sounds: false
+  sounds: false,
+  sidebarWidth: 300,
+  sidebarCollapsed: false,
+  paneLayout: 'stacked',
+  // 0.46 reproduces the fixed 46% split this replaced.
+  editorRatioY: 0.46,
+  editorRatioX: 0.5,
+  responseMaximized: false,
+  // Just above the fixed 180px this replaced, so the floor is not the default.
+  bodyEditorHeight: 200
 }
 
 /* ------------------------------------------------------------------ */
