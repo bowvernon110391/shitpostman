@@ -39,7 +39,10 @@ export function KeyValueEditor({
   }, [lastRow])
 
   const effective = useMemo<KeyValue[]>(() => {
-    if (isBlank(lastRow)) return rows
+    // Only reuse the rows as-is when there IS a trailing blank row to type into.
+    // An empty list has no last row (`isBlank(undefined)` is true), and reusing
+    // it would render nothing at all — leaving an empty table with no input.
+    if (rows.length > 0 && isBlank(lastRow)) return rows
     return [...rows, { id: blankId, key: '', value: '', enabled: true, description: '' }]
   }, [rows, lastRow, blankId])
 

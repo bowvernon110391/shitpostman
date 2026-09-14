@@ -978,6 +978,10 @@ textarea.aero-field {
   place-items: center;
   width: 15px;
   height: 15px;
+  /* Must be explicit: the global `button` reset only clears border/background,
+     so the UA's `1px 6px` would leave a 3px content box for an 11px tick and
+     push it off-centre. Matches .aero-button--icon and .aero-tree__twisty. */
+  padding: 0;
   flex: 0 0 auto;
   border-radius: 4px;
   background: linear-gradient(180deg, rgba(200, 228, 246, 0.7), #ffffff 60%);
@@ -1245,24 +1249,71 @@ textarea.aero-field {
     0 0 10px rgba(92, 194, 247, 0.35);
 }
 
+/*
+ * Row delete control.
+ * Behaves like every other icon action in the app: a glass chip with a glossy
+ * bevel that turns coral on hover to signal the destructive act. Sits flat and
+ * hidden until its row is hovered so the table stays calm.
+ * The border is declared transparent rather than `none` so revealing the chip
+ * cannot shift the 13px glyph off-centre.
+ * All states are scoped under `.aero-kv__row:hover` so specificity climbs
+ * monotonically (rest < chip < coral < press) and nothing needs `!important`.
+ */
 .aero-kv__delete {
   display: grid;
   place-items: center;
   width: 22px;
   height: 22px;
-  border-radius: 4px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
   color: var(--aero-coral-600);
   opacity: 0;
-  transition: opacity 0.15s var(--ease-out), background 0.15s var(--ease-out);
+  transition:
+    opacity 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    background 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    transform 0.12s var(--ease-spring);
 }
 
-.aero-kv__row:hover .aero-kv__delete {
-  opacity: 0.85;
+/* The trailing blank row has nothing to delete. */
+.aero-kv__delete:disabled {
+  cursor: default;
 }
 
-.aero-kv__delete:hover {
+.aero-kv__row:hover .aero-kv__delete:not(:disabled),
+.aero-kv__delete:focus-visible {
   opacity: 1;
-  background: linear-gradient(180deg, rgba(255, 220, 214, 0.95), rgba(255, 175, 160, 0.85));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(240, 250, 255, 0.5) 48%,
+    rgba(168, 213, 239, 0.4)
+  );
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -6px 10px rgba(150, 205, 240, 0.35) inset,
+    0 1px 3px rgba(9, 55, 92, 0.22);
+}
+
+.aero-kv__row:hover .aero-kv__delete:not(:disabled):hover,
+.aero-kv__delete:not(:disabled):hover {
+  color: #5c1408;
+  background: linear-gradient(180deg, #fff1ee 0%, #ffc9bd 44%, #ff9583 52%, #ef6a51 100%);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 -7px 12px rgba(230, 120, 95, 0.45) inset,
+    0 2px 6px rgba(110, 30, 15, 0.3),
+    0 0 0 1px rgba(160, 55, 35, 0.24);
+}
+
+.aero-kv__row:hover .aero-kv__delete:not(:disabled):active {
+  transform: scale(0.94);
+  box-shadow: var(--shadow-inset-sunk);
 }
 
 /* ==========================================================================
